@@ -1,0 +1,665 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>3 Lane Wave System - Full Stable</title>
+
+<style>
+html,body{
+  margin:0;
+  height:100%;
+  background:#0b1220;
+  overflow:hidden;
+  font-family:system-ui;
+}
+canvas{display:block;width:100vw;height:100vh;}
+.ui{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  z-index:10;
+}
+button{
+  padding:10px 18px;
+  border-radius:8px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+}
+#errorBox{
+  position:fixed;
+  left:12px;
+  bottom:12px;
+  max-width:min(860px,calc(100vw - 24px));
+  white-space:pre-wrap;
+  background:rgba(255,60,60,0.12);
+  border:1px solid rgba(255,60,60,0.35);
+  color:#ffd7d7;
+  padding:10px 12px;
+  border-radius:10px;
+  font:12px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  display:none;
+  z-index:20;
+}
+</style>
+</head>
+<body>
+
+<div class="ui" id="ui">
+  <button id="btnStart">Start</button>
+  <button id="btnPause">Pause</button>
+  <button id="btnRestart">Restart</button>
+</div>
+
+<pre id="errorBox"></pre>
+<canvas id="c"></canvas>
+
+<script>
+(() => {
+  const errorBox = document.getElementById("errorBox");
+  function showError(msg){
+    errorBox.style.display = "block";
+    errorBox.textContent = msg;
+  }
+
+  window.addEventListener("error", (e) => {
+    showError(
+      "JS ERROR:\n" +
+      (e.message || "Unknown error") +
+      "\n\nat: " + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || "")
+    );
+  });
+  window.addEventListener("unhandledrejection", (e) => {
+    showError("PROMISE ERROR:\n" + (e.reason?.stack || e.reason || "Unknown rejection"));
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d", { alpha:true });
+    if(!canvas) { showError("Canvas element not found (#c)"); return; }
+    if(!ctx) { showError("Canvas context is null (getContext failed)"); return; }
+
+    const SETTINGS = {
+      WAVE_DURATION: 45,
+      SPAWN_REDUCTION: 0.8,
+
+      BULLET_SPEED: 1200,
+      ENEMY_SPEED: 70,
+      MID_BOSS_SPEED: 45,
+      BIG_BOSS_SPEED_MULT: 0.33,
+
+      FIRE_RATE: 0.166,
+      MAX_BULLETS_PER_SHOT: 100,
+
+      PLAYER_W: 80,
+      PLAYER_H: 60,
+
+      ENEMY_SIZE: 14,
+      MID_BOSS_SIZE: 60,
+      BIG_BOSS_SIZE: 100,
+
+      BULLET_SIZE: 4,
+
+      SIGN_W: 60,
+      SIGN_H: 35,
+
+      RARE_W: 120,
+      RARE_H: 80,
+
+      DEFENSE_LINE: 0.85,
+
+      // performance cap
+      MAX_ENEMIES_PER_WAVE: 10000
+    };
+
+    let W=0, H=0;
+
+    const bridge = {
+      x: () => W*0.5,
+      w: () => Math.min(W*0.9, 720),
+      laneW: () => bridge.w()/3,
+      laneX: (i) => bridge.x() - bridge.w()/2 + bridge.laneW()*(i+0.5)
+    };
+
+    function defenseY(){ return H * SETTINGS.DEFENSE_LINE; }
+
+    function updateUIPosition(){
+      const ui = document.getElementById("ui");
+      if(!ui) return;
+      const laneLeft = bridge.x() - bridge.w()/2;
+      const desired = laneLeft - 140;     // outside lane
+      const clamped = Math.max(12, desired);
+      ui.style.left = clamped + "px";
+    }
+
+    function resize(){
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      updateUIPosition();
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    // ===== STATE =====
+    function getInitialState(){
+      return {
+        running:false,
+        score:0,
+        wave:1,
+        waveTimer:0,
+
+        desiredEnemyCount: 500,
+        enemyCount: 500,
+        overflowEnemies: 0,
+        hpBoost: 0,
+
+        enemySpawned:0,
+        spawnAccumulator:0,
+
+        boss13:false,
+        boss40:false,
+        bigBossSpawned:false,
+
+        signTimer:0,
+        signRate:0.6,
+        signValue:1,
+
+        lastRareHP:500
+      };
+    }
+
+    let state = getInitialState();
+
+    const player = {
+      x: bridge.laneX(1),
+      targetX: bridge.laneX(1),
+      soldiers: 15,
+      fireCD: 0
+    };
+
+    let enemies = [];
+    let bullets = [];
+    let signs = [];
+    let rare = null;
+
+    function computeWaveDesiredCount(wave){
+      return Math.floor(600 * Math.pow(1.7, wave - 1));
+    }
+
+    function applyEnemyCapForWave(){
+      state.desiredEnemyCount = computeWaveDesiredCount(state.wave);
+
+      const cap = SETTINGS.MAX_ENEMIES_PER_WAVE;
+      state.enemyCount = Math.min(state.desiredEnemyCount, cap);
+
+      state.overflowEnemies = Math.max(0, state.desiredEnemyCount - state.enemyCount);
+      state.hpBoost = state.enemyCount > 0 ? Math.floor(state.overflowEnemies / state.enemyCount) : 0;
+    }
+
+    function initGame(){
+      state = getInitialState();
+
+      player.x = bridge.laneX(1);
+      player.targetX = bridge.laneX(1);
+      player.fireCD = 0;
+      player.soldiers = 1;
+
+      enemies = [];
+      bullets = [];
+      signs = [];
+      rare = null;
+
+      applyEnemyCapForWave();
+      spawnRare();
+    }
+
+    // ===== INPUT =====
+    canvas.addEventListener("pointermove", (e) => {
+      const minX = bridge.x() - bridge.w()/2 + 40;
+      const maxX = bridge.x() + bridge.w()/2 - 40;
+      player.targetX = Math.max(minX, Math.min(maxX, e.clientX));
+    });
+
+    // ===== COLORS =====
+    function getEnemyColor(hp){
+      const hue = (hp*35) % 360;
+      return `hsl(${hue},70%,50%)`;
+    }
+    function getBulletColor(power){
+      const level = Math.min(20, Math.max(1, Math.floor(power)));
+      const hue = (level-1) * 12;
+      return `hsl(${hue},100%,55%)`;
+    }
+
+    // ===== SPAWN =====
+    function enemyHPByProgress(progress){
+      let hp = 1 + Math.floor(state.wave/2);
+      if(progress > 0.40) hp += 1;
+      if(progress > 0.70) hp += 1;
+      if(progress > 0.90) hp += 1;
+
+      hp += state.hpBoost; // overflow -> hp
+      return Math.max(1, hp);
+    }
+
+    function spawnEnemy(){
+      const progress = state.enemyCount > 0 ? (state.enemySpawned / state.enemyCount) : 0;
+      const hp = enemyHPByProgress(progress);
+
+      enemies.push({
+        x: bridge.laneX(1) + (Math.random()-0.5) * bridge.laneW() * 0.6,
+        y: -20,
+        hp,
+        maxHp: hp,
+        type: "normal"
+      });
+    }
+
+    function spawnMidBoss(mult, whenSec){
+      const base = Math.max(10, Math.floor(state.desiredEnemyCount * mult));
+      const hp = base + (state.hpBoost * 40);
+      enemies.push({
+        x: bridge.laneX(1),
+        y: -50,
+        hp,
+        maxHp: hp,
+        type: "mid",
+        label: (whenSec === 13 ? "13s" : "40s")
+      });
+    }
+
+    function spawnBigBoss(){
+      const base = Math.max(2000, Math.floor(state.desiredEnemyCount * (state.wave + 1)));
+      const hp = base + (state.hpBoost * 120);
+      enemies.push({
+        x: bridge.laneX(1),
+        y: -60,
+        hp,
+        maxHp: hp,
+        type: "big"
+      });
+    }
+
+    function spawnRare(){
+      rare = {
+        x: bridge.laneX(0),
+        y: H * 0.30,
+        hp: state.lastRareHP,
+        maxHp: state.lastRareHP
+      };
+    }
+
+    function spawnSign(){
+      signs.push({
+        x: bridge.laneX(2),
+        y: -20,
+        value: state.signValue
+      });
+    }
+
+    // ===== SHOOT (POWER BULLETS) =====
+    function shoot(dt){
+      player.fireCD -= dt;
+      if(player.fireCD > 0) return;
+
+      player.fireCD = SETTINGS.FIRE_RATE;
+
+      const totalPower = Math.max(0, player.soldiers);
+      if(totalPower <= 0) return;
+
+      const bulletCount = Math.min(SETTINGS.MAX_BULLETS_PER_SHOT, Math.max(1, Math.floor(totalPower)));
+      const powerPerBullet = totalPower / bulletCount;
+
+      for(let i=0;i<bulletCount;i++){
+        bullets.push({
+          x: player.x + (Math.random()-0.5)*30,
+          y: defenseY(),
+          power: powerPerBullet,
+          dead:false
+        });
+      }
+    }
+
+    // ===== UPDATE =====
+    function update(dt){
+      player.x += (player.targetX - player.x) * 0.2;
+      state.waveTimer += dt;
+
+      const spawnPerSec = (state.enemyCount * SETTINGS.SPAWN_REDUCTION) / SETTINGS.WAVE_DURATION;
+      state.spawnAccumulator += spawnPerSec * dt;
+
+      while(state.spawnAccumulator >= 1 && state.enemySpawned < state.enemyCount){
+        spawnEnemy();
+        state.spawnAccumulator -= 1;
+        state.enemySpawned += 1;
+      }
+
+      if(state.waveTimer >= 13 && !state.boss13){
+        spawnMidBoss(1, 13);
+        state.boss13 = true;
+      }
+      if(state.waveTimer >= 40 && !state.boss40){
+        spawnMidBoss(1.5, 40);
+        state.boss40 = true;
+      }
+
+      if(state.wave % 3 === 0 && !state.bigBossSpawned && state.waveTimer > 20){
+        spawnBigBoss();
+        state.bigBossSpawned = true;
+      }
+
+      if(state.waveTimer >= SETTINGS.WAVE_DURATION){
+        state.wave += 1;
+        state.waveTimer = 0;
+        state.enemySpawned = 0;
+        state.spawnAccumulator = 0;
+
+        state.boss13 = false;
+        state.boss40 = false;
+        state.bigBossSpawned = false;
+
+        applyEnemyCapForWave();
+      }
+
+      state.signTimer -= dt;
+      if(state.signTimer <= 0){
+        spawnSign();
+        state.signTimer = state.signRate;
+      }
+
+      shoot(dt);
+
+      for(const b of bullets) b.y -= SETTINGS.BULLET_SPEED * dt;
+      bullets = bullets.filter(b => b.y > -40 && !b.dead);
+
+      for(const e of enemies){
+        let size = SETTINGS.ENEMY_SIZE;
+        let speed = SETTINGS.ENEMY_SPEED;
+
+        if(e.type === "mid"){
+          size = SETTINGS.MID_BOSS_SIZE;
+          speed = SETTINGS.MID_BOSS_SPEED;
+        }else if(e.type === "big"){
+          size = SETTINGS.BIG_BOSS_SIZE;
+          speed = SETTINGS.ENEMY_SPEED * SETTINGS.BIG_BOSS_SPEED_MULT;
+        }
+
+        e.y += speed * dt;
+
+        for(const b of bullets){
+          if(b.dead || b.power <= 0) continue;
+
+          if(Math.abs(b.x - e.x) < size/2 && Math.abs(b.y - e.y) < size/2){
+            const dmg = Math.min(b.power, e.hp);
+            e.hp -= dmg;
+            b.power -= dmg;
+
+            if(b.power <= 0) b.dead = true;
+
+            if(e.hp <= 0){
+              state.score += Math.floor(e.maxHp);
+              e.dead = true;
+            }
+            if(e.dead) break;
+          }
+        }
+
+        if(e.y + size/2 >= defenseY()){
+          player.soldiers -= e.hp;
+          e.dead = true;
+        }
+      }
+      enemies = enemies.filter(e => !e.dead);
+
+      if(rare){
+        const halfW = SETTINGS.RARE_W/2;
+        const halfH = SETTINGS.RARE_H/2;
+
+        for(const b of bullets){
+          if(b.dead || b.power <= 0) continue;
+
+          if(
+            b.x >= rare.x - halfW && b.x <= rare.x + halfW &&
+            b.y >= rare.y - halfH && b.y <= rare.y + halfH
+          ){
+            const dmg = Math.min(b.power, rare.hp);
+            rare.hp -= dmg;
+            b.power -= dmg;
+
+            if(b.power <= 0) b.dead = true;
+          }
+        }
+
+        if(rare.hp <= 0){
+          state.signValue += 1;
+          state.lastRareHP = Math.floor(state.lastRareHP * 1.6 + (player.soldiers * 1.2));
+          spawnRare();
+        }
+      }
+
+      for(const s of signs){
+        s.y += 150 * dt;
+
+        if(Math.abs(s.y - defenseY()) < 40 && Math.abs(player.x - s.x) < 40){
+          player.soldiers += s.value;
+          s.dead = true;
+        }
+        if(s.y > H + 40) s.dead = true;
+      }
+      signs = signs.filter(s => !s.dead);
+
+      if(player.soldiers <= 0){
+        player.soldiers = 0;
+        state.running = false;
+      }
+    }
+
+    // ===== DRAW =====
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+
+      const bridgeLeft = bridge.x() - bridge.w()/2;
+      const dY = defenseY();
+
+      // wave background
+      ctx.save();
+      ctx.globalAlpha = 0.06;
+      ctx.fillStyle = "#fff";
+      ctx.font = "900 160px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("WAVE " + state.wave, bridge.laneX(1), H*0.55);
+      ctx.restore();
+
+      // lanes
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillRect(bridgeLeft, 0, bridge.w(), H);
+
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 2;
+      for(let i=1;i<3;i++){
+        const lx = bridgeLeft + bridge.laneW()*i;
+        ctx.beginPath();
+        ctx.moveTo(lx,0);
+        ctx.lineTo(lx,H);
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "rgba(255,0,0,0.6)";
+      ctx.beginPath();
+      ctx.moveTo(bridgeLeft, dY);
+      ctx.lineTo(bridgeLeft + bridge.w(), dY);
+      ctx.stroke();
+
+      // HUD Score
+      ctx.fillStyle = "white";
+      ctx.font = "bold 34px system-ui";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText("Score: " + state.score, 20, 50);
+
+      // ✅ Soldier bar (ORANGE-RED)
+      const barX = 20, barY = 70, barW = 320, barH = 18;
+
+      ctx.fillStyle = "rgba(0,0,0,0.38)";
+      ctx.fillRect(barX, barY, barW, barH);
+      ctx.strokeStyle = "rgba(255,255,255,0.18)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(barX + 0.5, barY + 0.5, barW - 1, barH - 1);
+
+      const ratio = Math.min(1, player.soldiers / 1000);
+      const fillW = barW * ratio;
+
+      if(fillW > 0){
+        const grad = ctx.createLinearGradient(barX, 0, barX + fillW, 0);
+        grad.addColorStop(0, "rgba(255,165,0,0.95)");
+        grad.addColorStop(1, "rgba(255,60,60,0.95)");
+        ctx.fillStyle = grad;
+        ctx.fillRect(barX, barY, fillW, barH);
+
+        ctx.fillStyle = "rgba(255,255,255,0.18)";
+        ctx.fillRect(barX, barY + 2, fillW, 2);
+      }
+
+      ctx.font = "bold 14px system-ui";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.shadowColor = "rgba(0,0,0,0.8)";
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = "rgba(255, 235, 200, 0.98)";
+      ctx.fillText("Soldiers: " + Math.floor(player.soldiers), barX + 10, barY + 14);
+      ctx.shadowBlur = 0;
+
+      // Rare
+      if(rare){
+        ctx.fillStyle = "gold";
+        ctx.fillRect(
+          rare.x - SETTINGS.RARE_W/2,
+          rare.y - SETTINGS.RARE_H/2,
+          SETTINGS.RARE_W,
+          SETTINGS.RARE_H
+        );
+        ctx.fillStyle = "lime";
+        ctx.fillRect(
+          rare.x - SETTINGS.RARE_W/2,
+          rare.y - SETTINGS.RARE_H/2 - 10,
+          SETTINGS.RARE_W * (rare.hp/rare.maxHp),
+          6
+        );
+        ctx.fillStyle = "black";
+        ctx.font = "bold 18px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(Math.floor(rare.hp), rare.x, rare.y);
+      }
+
+      // Player
+      ctx.fillStyle = "cyan";
+      ctx.fillRect(
+        player.x - SETTINGS.PLAYER_W/2,
+        dY - SETTINGS.PLAYER_H,
+        SETTINGS.PLAYER_W,
+        SETTINGS.PLAYER_H
+      );
+      ctx.fillStyle = "black";
+      ctx.font = "bold 22px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(Math.floor(player.soldiers), player.x, dY - SETTINGS.PLAYER_H/2);
+
+      // Bullets
+      for(const b of bullets){
+        if(b.dead) continue;
+        ctx.fillStyle = getBulletColor(b.power);
+        ctx.fillRect(b.x, b.y, SETTINGS.BULLET_SIZE, SETTINGS.BULLET_SIZE);
+      }
+
+      // Layer fix: normal enemies then bosses
+      const normals = [];
+      const bosses = [];
+      for(const e of enemies){
+        if(e.type === "mid" || e.type === "big") bosses.push(e);
+        else normals.push(e);
+      }
+
+      function drawEnemy(e){
+        let size = SETTINGS.ENEMY_SIZE;
+        if(e.type === "mid") size = SETTINGS.MID_BOSS_SIZE;
+        if(e.type === "big") size = SETTINGS.BIG_BOSS_SIZE;
+
+        ctx.fillStyle = (e.type === "big") ? "purple" : getEnemyColor(e.maxHp);
+        ctx.fillRect(e.x - size/2, e.y - size/2, size, size);
+
+        if(e.type === "mid" || e.type === "big"){
+          ctx.fillStyle = "lime";
+          ctx.fillRect(
+            e.x - size/2,
+            e.y - size/2 - 10,
+            size * (e.hp/e.maxHp),
+            6
+          );
+        }
+
+        ctx.fillStyle = (e.type === "normal") ? "rgba(0,0,0,0.75)" : "white";
+        ctx.font = (e.type === "normal") ? "bold 12px system-ui" : "bold 16px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(Math.floor(e.hp), e.x, e.y);
+      }
+
+      for(const e of normals) drawEnemy(e);
+      for(const e of bosses) drawEnemy(e);
+
+      // Signs
+      for(const s of signs){
+        ctx.fillStyle = "lightgreen";
+        ctx.fillRect(
+          s.x - SETTINGS.SIGN_W/2,
+          s.y,
+          SETTINGS.SIGN_W,
+          SETTINGS.SIGN_H
+        );
+        ctx.fillStyle = "black";
+        ctx.font = "bold 16px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("+" + s.value, s.x, s.y + SETTINGS.SIGN_H/2);
+      }
+    }
+
+    // ===== LOOP =====
+    let last = performance.now();
+    function loop(now){
+      const dt = (now-last)/1000;
+      last = now;
+
+      if(state.running) update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // ===== UI =====
+    document.getElementById("btnStart").addEventListener("click", () => {
+      initGame();
+      state.running = true;
+    });
+    document.getElementById("btnPause").addEventListener("click", () => {
+      state.running = !state.running;
+    });
+    document.getElementById("btnRestart").addEventListener("click", () => {
+      initGame();
+      state.running = true;
+    });
+
+    initGame();
+    errorBox.style.display = "none";
+  });
+})();
+</script>
+</body>
+</html>
