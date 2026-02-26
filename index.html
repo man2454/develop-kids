@@ -62,7 +62,7 @@ button{
 .overlay.show{ display:flex; }
 
 .modal{
-  width:min(420px, calc(100vw - 28px));
+  width:min(560px, calc(100vw - 28px));
   border-radius:16px;
   padding:18px 18px 14px;
   background:rgba(15,20,35,0.92);
@@ -97,6 +97,8 @@ button{
   font-weight:800;
   margin-top:2px;
 }
+.stat.wide{ grid-column:1 / -1; }
+
 .modal .row{
   display:flex;
   gap:10px;
@@ -112,12 +114,39 @@ button{
 }
 .btn.primary{ background:rgba(255,70,70,0.95); color:#fff; }
 .btn.ghost{ background:rgba(255,255,255,0.12); color:#fff; }
+
+.leaderboard{
+  margin:12px 0 6px;
+  text-align:left;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;
+  padding:10px 12px;
+  max-height:170px;
+  overflow:auto;
+  font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+.leaderboard .title{
+  font-weight:900;
+  margin-bottom:6px;
+  letter-spacing:0.4px;
+}
+.leaderboard .empty{
+  opacity:0.75;
+}
+.leaderboard ol{
+  margin:0;
+  padding-left:18px;
+}
+.leaderboard li{
+  margin:2px 0;
+}
+
 .small{
   margin-top:10px;
   opacity:0.75;
   font-size:12px;
 }
-
 </style>
 </head>
 <body>
@@ -131,12 +160,24 @@ button{
 <div class="overlay" id="gameOverOverlay">
   <div class="modal">
     <h2>GAME OVER</h2>
+
     <div class="stats">
       <div class="stat"><div class="k">Score</div><div class="v" id="goScore">0</div></div>
       <div class="stat"><div class="k">Wave</div><div class="v" id="goWave">1</div></div>
       <div class="stat"><div class="k">Best Score</div><div class="v" id="goBest">0</div></div>
-      <div class="stat"><div class="k">Soldiers</div><div class="v" id="goSoldiers">0</div></div>
+      <div class="stat"><div class="k">Soldiers (End)</div><div class="v" id="goSoldiers">0</div></div>
+
+      <div class="stat"><div class="k">Rare Boxes</div><div class="v" id="goRareBoxes">0</div></div>
+      <div class="stat"><div class="k">Max Soldiers</div><div class="v" id="goMaxSoldiers">0</div></div>
+
+      <div class="stat wide"><div class="k">Time Survived</div><div class="v" id="goTime">0m 0s</div></div>
     </div>
+
+    <div class="leaderboard" id="goTop">
+      <div class="title">Top 10 Scores</div>
+      <div class="empty">No scores yet.</div>
+    </div>
+
     <div class="row">
       <button class="btn primary" id="goRestart">Restart</button>
       <button class="btn ghost" id="goClose">Close</button>
@@ -173,50 +214,9 @@ button{
     if(!canvas) { showError("Canvas element not found (#c)"); return; }
     if(!ctx) { showError("Canvas context is null (getContext failed)"); return; }
 
-    /* ===== POPUP HELPERS ===== */
-    const overlay = document.getElementById("gameOverOverlay");
-    const goScore = document.getElementById("goScore");
-    const goWave = document.getElementById("goWave");
-    const goBest = document.getElementById("goBest");
-    const goSoldiers = document.getElementById("goSoldiers");
-
-    function getBestScore(){
-      const v = Number(localStorage.getItem("bestScore") || "0");
-      return Number.isFinite(v) ? v : 0;
-    }
-    function setBestScore(v){
-      localStorage.setItem("bestScore", String(Math.floor(v)));
-    }
-    function openGameOver(){
-      // pause
-      state.running = false;
-
-      const best = Math.max(getBestScore(), Math.floor(state.score));
-      setBestScore(best);
-
-      goScore.textContent = String(Math.floor(state.score));
-      goWave.textContent = String(state.wave);
-      goBest.textContent = String(best);
-      goSoldiers.textContent = String(Math.floor(player.soldiers));
-
-      overlay.classList.add("show");
-    }
-    function closeGameOver(){
-      overlay.classList.remove("show");
-    }
-
-    document.getElementById("goRestart").addEventListener("click", () => {
-      closeGameOver();
-      initGame();
-      state.running = true;
-    });
-    document.getElementById("goClose").addEventListener("click", () => {
-      closeGameOver();
-    });
-
+    /* ===== TUNING SETTINGS ===== */
     const SETTINGS = {
       WAVE_DURATION: 45,
-      SPAWN_REDUCTION: 0.8,
 
       BULLET_SPEED: 1200,
       ENEMY_SPEED: 70,
@@ -224,7 +224,9 @@ button{
       BIG_BOSS_SPEED_MULT: 0.33,
 
       FIRE_RATE: 0.166,
-      MAX_BULLETS_PER_SHOT: 100,
+      MAX_BULLETS_PER_SHOT: 90,      // reduced a bit for stability
+      MAX_BULLETS_ONSCREEN: 1200,    // hard cap bullets alive
+      ACTIVE_ENEMY_CAP: 1800,        // cap enemies alive to protect mobile
 
       PLAYER_W: 80,
       PLAYER_H: 60,
@@ -235,44 +237,141 @@ button{
 
       BULLET_SIZE: 4,
 
-      SIGN_W: 60,
-      SIGN_H: 35,
+      DROP_W: 72,
+      DROP_H: 42,
+      DROP_FALL_SPEED: 150,
+      DROP_RATE: 0.60,
+      DROP_SPECIAL_EVERY: 40,
+      DROP_RAINBOW_EVERY: 200,
 
       RARE_W: 120,
       RARE_H: 80,
 
       DEFENSE_LINE: 0.85,
+      MAX_ENEMIES_PER_WAVE: 10000,
 
-      MAX_ENEMIES_PER_WAVE: 10000
+      RARE_SWAY_SPEED: 1.10,
+      RARE_SWAY_AMP: 0.35,
+
+      MID_BOSS_SWAY_SPEED_MIN: 1.00,
+      MID_BOSS_SWAY_SPEED_MAX: 1.80,
+      MID_BOSS_SWAY_AMP: 0.35,
+
+      BIG_BOSS_SWAY_SPEED_MIN: 0.80,
+      BIG_BOSS_SWAY_SPEED_MAX: 1.40,
+      BIG_BOSS_SWAY_AMP: 0.33,
+
+      FIRE_RATE_SCALE_MIN: 0.35,
+      FIRE_RATE_SCALE_MAX: 3.00,
+      SPD_UP_MULT: 0.85,
+      SPD_DOWN_MULT: 1.15,
+
+      XCANON_DURATION: 10,
+      XCANON_BULLET_SPEED_MULT: 6,  // reduced from 10 (still fast, less tunneling)
+
+      DIV2_MIN_SOLDIERS: 1,
+
+      // dt clamp to avoid huge spikes
+      MAX_DT: 0.05
     };
 
+    /* ===== POPUP HELPERS ===== */
+    const overlay = document.getElementById("gameOverOverlay");
+    const goScore = document.getElementById("goScore");
+    const goWave = document.getElementById("goWave");
+    const goBest = document.getElementById("goBest");
+    const goSoldiers = document.getElementById("goSoldiers");
+    const goRareBoxes = document.getElementById("goRareBoxes");
+    const goMaxSoldiers = document.getElementById("goMaxSoldiers");
+    const goTime = document.getElementById("goTime");
+    const goTop = document.getElementById("goTop");
+
+    function getBestScore(){
+      const v = Number(localStorage.getItem("bestScore") || "0");
+      return Number.isFinite(v) ? v : 0;
+    }
+    function setBestScore(v){
+      localStorage.setItem("bestScore", String(Math.floor(v)));
+    }
+
+    function getTopScores(){
+      try{
+        const arr = JSON.parse(localStorage.getItem("topScores") || "[]");
+        if(!Array.isArray(arr)) return [];
+        return arr.map(x => Math.max(0, Math.floor(Number(x) || 0))).slice(0, 10);
+      }catch{
+        return [];
+      }
+    }
+    function saveTopScore(score){
+      const s = Math.max(0, Math.floor(Number(score) || 0));
+      const list = getTopScores();
+      list.push(s);
+      list.sort((a,b)=>b-a);
+      const top10 = list.slice(0, 10);
+      localStorage.setItem("topScores", JSON.stringify(top10));
+      return top10;
+    }
+    function renderTopScores(list){
+      const title = '<div class="title">Top 10 Scores</div>';
+      if(!list || list.length === 0){
+        goTop.innerHTML = title + '<div class="empty">No scores yet.</div>';
+        return;
+      }
+      let html = title + "<ol>";
+      for(const s of list) html += "<li>" + String(s) + "</li>";
+      html += "</ol>";
+      goTop.innerHTML = html;
+    }
+
+    function fmtTime(sec){
+      const s = Math.max(0, Math.floor(sec));
+      const m = Math.floor(s / 60);
+      const r = s % 60;
+      return m + "m " + r + "s";
+    }
+
+    /* ===== CANVAS / WORLD ===== */
     let W=0, H=0;
 
     const bridge = {
       x: () => W*0.5,
       w: () => Math.min(W*0.9, 720),
       laneW: () => bridge.w()/3,
-      laneX: (i) => bridge.x() - bridge.w()/2 + bridge.laneW()*(i+0.5)
+      laneX: (i) => bridge.x() - bridge.w()/2 + bridge.laneW()*(i+0.5),
+      laneLeft: (i) => (bridge.x() - bridge.w()/2) + bridge.laneW()*i,
+      laneRight: (i) => ((bridge.x() - bridge.w()/2) + bridge.laneW()*i) + bridge.laneW()
     };
 
     function defenseY(){ return H * SETTINGS.DEFENSE_LINE; }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 
-    function updateUIPosition(){
-      const ui = document.getElementById("ui");
-      if(!ui) return;
-      const laneLeft = bridge.x() - bridge.w()/2;
-      const desired = laneLeft - 140;
-      const clamped = Math.max(12, desired);
-      ui.style.left = clamped + "px";
+    function clampCenterToLane(laneIdx, x, halfSize){
+      const minX = bridge.laneLeft(laneIdx) + halfSize + 6;
+      const maxX = bridge.laneRight(laneIdx) - halfSize - 6;
+      return clamp(x, minX, maxX);
     }
 
-    function resize(){
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      updateUIPosition();
+    function laneOfX(x){
+      const left = bridge.x() - bridge.w()/2;
+      const rel = x - left;
+      const lw = bridge.laneW();
+      const idx = Math.floor(rel / lw);
+      return clamp(idx, 0, 2);
     }
-    window.addEventListener("resize", resize);
-    resize();
+
+    /* ===== GAME STATE (declare BEFORE resize to avoid TDZ) ===== */
+    let enemies = [];
+    let bullets = [];
+    let drops = [];
+    let rare = null;
+
+    const player = {
+      x: 0,
+      targetX: 0,
+      soldiers: 1,
+      fireCD: 0
+    };
 
     function getInitialState(){
       return {
@@ -293,30 +392,69 @@ button{
         boss40:false,
         bigBossSpawned:false,
 
-        signTimer:0,
-        signRate:0.6,
-        signValue:1,
+        dropTimer:0,
+        dropValue:1,
+        dropsFallen:0,
 
-        lastRareHP:500
+        fireRateScale: 1.0,
+        xCanonTimer: 0,
+
+        lastRareHP:500,
+
+        rareBoxesBroken: 0,
+        maxSoldiers: 1,
+        playTime: 0,
+
+        // carry enemies we couldn't spawn due to ACTIVE_ENEMY_CAP (convert to hp later)
+        suppressedCarry: 0
       };
     }
-
     let state = getInitialState();
 
-    const player = {
-      x: bridge.laneX(1),
-      targetX: bridge.laneX(1),
-      soldiers: 15,
-      fireCD: 0
-    };
+    // simple color cache for bullets (reduces string churn)
+    const bulletColorCache = Array.from({length: 21}, (_,i) => {
+      if(i === 0) return "hsl(0,100%,55%)";
+      const hue = (i-1) * 12;
+      return `hsl(${hue},100%,55%)`;
+    });
 
-    let enemies = [];
-    let bullets = [];
-    let signs = [];
-    let rare = null;
+    function updateUIPosition(){
+      const ui = document.getElementById("ui");
+      if(!ui) return;
+      const laneLeft = bridge.x() - bridge.w()/2;
+      const desired = laneLeft - 140;
+      const clampedLeft = Math.max(12, desired);
+      ui.style.left = clampedLeft + "px";
+    }
 
+    function resize(){
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      updateUIPosition();
+
+      if(rare){
+        rare.baseX = bridge.laneX(0);
+        rare.amp = bridge.laneW() * SETTINGS.RARE_SWAY_AMP;
+        rare.x = clampCenterToLane(0, rare.x, SETTINGS.RARE_W/2);
+        rare.y = H * 0.30;
+      }
+
+      for(const e of enemies){
+        if(e.type === "mid" || e.type === "big"){
+          const size = (e.type === "mid") ? SETTINGS.MID_BOSS_SIZE : SETTINGS.BIG_BOSS_SIZE;
+          e.baseX = bridge.laneX(1);
+          e.x = clampCenterToLane(1, e.x, size/2);
+        }
+      }
+    }
+    window.addEventListener("resize", resize);
+    resize();
+
+    /* ===== SPAWN / LOGIC ===== */
+
+    // matches your earlier rule more closely: wave1=500, then double
     function computeWaveDesiredCount(wave){
-      return Math.floor(600 * Math.pow(1.7, wave - 1));
+      return Math.floor(500 * Math.pow(2, wave - 1));
     }
 
     function applyEnemyCapForWave(){
@@ -325,43 +463,16 @@ button{
       const cap = SETTINGS.MAX_ENEMIES_PER_WAVE;
       state.enemyCount = Math.min(state.desiredEnemyCount, cap);
 
-      state.overflowEnemies = Math.max(0, state.desiredEnemyCount - state.enemyCount);
-      state.hpBoost = state.enemyCount > 0 ? Math.floor(state.overflowEnemies / state.enemyCount) : 0;
-    }
+      // overflow = (desired - capped) + suppressedCarry (from last wave cap)
+      const overflow = Math.max(0, state.desiredEnemyCount - state.enemyCount) + Math.max(0, state.suppressedCarry);
+      state.suppressedCarry = 0;
 
-    function initGame(){
-      closeGameOver();
+      state.overflowEnemies = overflow;
 
-      state = getInitialState();
-
-      player.x = bridge.laneX(1);
-      player.targetX = bridge.laneX(1);
-      player.fireCD = 0;
-      player.soldiers = 15;
-
-      enemies = [];
-      bullets = [];
-      signs = [];
-      rare = null;
-
-      applyEnemyCapForWave();
-      spawnRare();
-    }
-
-    canvas.addEventListener("pointermove", (e) => {
-      const minX = bridge.x() - bridge.w()/2 + 40;
-      const maxX = bridge.x() + bridge.w()/2 - 40;
-      player.targetX = Math.max(minX, Math.min(maxX, e.clientX));
-    });
-
-    function getEnemyColor(hp){
-      const hue = (hp*35) % 360;
-      return `hsl(${hue},70%,50%)`;
-    }
-    function getBulletColor(power){
-      const level = Math.min(20, Math.max(1, Math.floor(power)));
-      const hue = (level-1) * 12;
-      return `hsl(${hue},100%,55%)`;
+      // Use ceil so even overflow < enemyCount still boosts at least +1 (when overflow exists)
+      state.hpBoost = (state.enemyCount > 0 && overflow > 0)
+        ? Math.floor((overflow + state.enemyCount - 1) / state.enemyCount)
+        : 0;
     }
 
     function enemyHPByProgress(progress){
@@ -383,81 +494,280 @@ button{
         y: -20,
         hp,
         maxHp: hp,
-        type: "normal"
+        type: "normal",
+        lane: 1,
+        dead:false
       });
     }
 
     function spawnMidBoss(mult){
       const base = Math.max(10, Math.floor(state.desiredEnemyCount * mult));
       const hp = base + (state.hpBoost * 40);
+
       enemies.push({
         x: bridge.laneX(1),
+        baseX: bridge.laneX(1),
+        lane: 1,
+        swayT: Math.random() * Math.PI * 2,
+        swaySpd: SETTINGS.MID_BOSS_SWAY_SPEED_MIN + Math.random() * (SETTINGS.MID_BOSS_SWAY_SPEED_MAX - SETTINGS.MID_BOSS_SWAY_SPEED_MIN),
+        swayAmp: bridge.laneW() * SETTINGS.MID_BOSS_SWAY_AMP,
         y: -50,
         hp,
         maxHp: hp,
-        type: "mid"
+        type: "mid",
+        dead:false
       });
     }
 
     function spawnBigBoss(){
       const base = Math.max(2000, Math.floor(state.desiredEnemyCount * (state.wave + 1)));
       const hp = base + (state.hpBoost * 120);
+
       enemies.push({
         x: bridge.laneX(1),
+        baseX: bridge.laneX(1),
+        lane: 1,
+        swayT: Math.random() * Math.PI * 2,
+        swaySpd: SETTINGS.BIG_BOSS_SWAY_SPEED_MIN + Math.random() * (SETTINGS.BIG_BOSS_SWAY_SPEED_MAX - SETTINGS.BIG_BOSS_SWAY_SPEED_MIN),
+        swayAmp: bridge.laneW() * SETTINGS.BIG_BOSS_SWAY_AMP,
         y: -60,
         hp,
         maxHp: hp,
-        type: "big"
+        type: "big",
+        dead:false
       });
     }
 
     function spawnRare(){
       rare = {
+        lane: 0,
+        baseX: bridge.laneX(0),
         x: bridge.laneX(0),
         y: H * 0.30,
+        swayT: Math.random() * Math.PI * 2,
+        swaySpd: SETTINGS.RARE_SWAY_SPEED,
+        swayAmp: bridge.laneW() * SETTINGS.RARE_SWAY_AMP,
         hp: state.lastRareHP,
         maxHp: state.lastRareHP
       };
+      rare.x = clampCenterToLane(0, rare.x, SETTINGS.RARE_W/2);
     }
 
-    function spawnSign(){
-      signs.push({
+    function spawnDrop(){
+      state.dropsFallen += 1;
+
+      const idx = state.dropsFallen;
+      const isRainbow = (idx % SETTINGS.DROP_RAINBOW_EVERY === 0);
+      const isSpecial = (!isRainbow && (idx % SETTINGS.DROP_SPECIAL_EVERY === 0));
+
+      let kind = "normal";
+      if(isRainbow){
+        const r = Math.floor(Math.random() * 4);
+        kind = (r === 0) ? "xcanon" : (r === 1) ? "inc5" : (r === 2) ? "inc10" : "multDrop2";
+      }else if(isSpecial){
+        const r = Math.floor(Math.random() * 4);
+        kind = (r === 0) ? "mult2" : (r === 1) ? "div2" : (r === 2) ? "spdUp" : "spdDown";
+      }
+
+      drops.push({
         x: bridge.laneX(2),
-        y: -20,
-        value: state.signValue
+        y: -SETTINGS.DROP_H - 10,
+        kind,
+        value: state.dropValue,
+        dead:false
       });
+    }
+
+    function dropLabel(d){
+      switch(d.kind){
+        case "normal": return "+" + d.value;
+        case "mult2": return "x2";
+        case "div2": return "/2";
+        case "spdUp": return "+SPD";
+        case "spdDown": return "-SPD";
+        case "xcanon": return "X-Canon";
+        case "inc5": return "+5";
+        case "inc10": return "+10";
+        case "multDrop2": return "x2 Soldier";
+        default: return "?";
+      }
+    }
+
+    function applyDropEffect(d){
+      if(d.kind === "normal"){
+        player.soldiers += d.value;
+      }else if(d.kind === "mult2"){
+        player.soldiers = Math.max(1, Math.floor(player.soldiers * 2));
+      }else if(d.kind === "div2"){
+        player.soldiers = Math.max(SETTINGS.DIV2_MIN_SOLDIERS, Math.floor(player.soldiers / 2));
+      }else if(d.kind === "spdUp"){
+        state.fireRateScale = Math.max(SETTINGS.FIRE_RATE_SCALE_MIN, state.fireRateScale * SETTINGS.SPD_UP_MULT);
+      }else if(d.kind === "spdDown"){
+        state.fireRateScale = Math.min(SETTINGS.FIRE_RATE_SCALE_MAX, state.fireRateScale * SETTINGS.SPD_DOWN_MULT);
+      }else if(d.kind === "xcanon"){
+        state.xCanonTimer = Math.max(state.xCanonTimer, SETTINGS.XCANON_DURATION);
+      }else if(d.kind === "inc5"){
+        state.dropValue += 5;
+      }else if(d.kind === "inc10"){
+        state.dropValue += 10;
+      }else if(d.kind === "multDrop2"){
+        state.dropValue = Math.max(1, Math.floor(state.dropValue * 2));
+      }
+
+      if(player.soldiers > state.maxSoldiers) state.maxSoldiers = player.soldiers;
+    }
+
+    function getEnemyColor(hp){
+      const hue = (hp*35) % 360;
+      return `hsl(${hue},70%,50%)`;
+    }
+    function getBulletColor(power){
+      const level = Math.min(20, Math.max(1, Math.floor(power)));
+      return bulletColorCache[level] || bulletColorCache[20];
     }
 
     function shoot(dt){
       player.fireCD -= dt;
       if(player.fireCD > 0) return;
 
-      player.fireCD = SETTINGS.FIRE_RATE;
-
       const totalPower = Math.max(0, player.soldiers);
       if(totalPower <= 0) return;
 
-      const bulletCount = Math.min(SETTINGS.MAX_BULLETS_PER_SHOT, Math.max(1, Math.floor(totalPower)));
+      const fireInterval = SETTINGS.FIRE_RATE * state.fireRateScale;
+      player.fireCD = fireInterval;
+
+      const bulletCount = Math.min(
+        SETTINGS.MAX_BULLETS_PER_SHOT,
+        Math.max(1, Math.ceil(Math.sqrt(totalPower)))
+      );
       const powerPerBullet = totalPower / bulletCount;
 
       for(let i=0;i<bulletCount;i++){
         bullets.push({
           x: player.x + (Math.random()-0.5)*30,
           y: defenseY(),
+          prevY: defenseY(),
           power: powerPerBullet,
           dead:false
         });
       }
+
+      // cap bullets onscreen to avoid runaway on mobile
+      if(bullets.length > SETTINGS.MAX_BULLETS_ONSCREEN){
+        bullets.splice(0, bullets.length - SETTINGS.MAX_BULLETS_ONSCREEN);
+      }
+    }
+
+    function updateBossSway(e, dt, size){
+      e.swayT += dt * e.swaySpd;
+      const x = e.baseX + Math.sin(e.swayT) * e.swayAmp;
+      e.x = clampCenterToLane(e.lane, x, size/2);
+    }
+
+    function updateRareSway(dt){
+      if(!rare) return;
+      rare.swayT += dt * rare.swaySpd;
+      const x = rare.baseX + Math.sin(rare.swayT) * rare.swayAmp;
+      rare.x = clampCenterToLane(rare.lane, x, SETTINGS.RARE_W/2);
+    }
+
+    function initGame(){
+      overlay.classList.remove("show");
+
+      state = getInitialState();
+
+      player.x = bridge.laneX(1);
+      player.targetX = bridge.laneX(1);
+      player.fireCD = 0;
+      player.soldiers = 1;
+
+      enemies = [];
+      bullets = [];
+      drops = [];
+      rare = null;
+
+      applyEnemyCapForWave();
+      spawnRare();
+
+      renderTopScores(getTopScores());
+      errorBox.style.display = "none";
+    }
+
+    function openGameOver(){
+      state.running = false;
+
+      const best = Math.max(getBestScore(), Math.floor(state.score));
+      setBestScore(best);
+
+      const top10 = saveTopScore(state.score);
+      renderTopScores(top10);
+
+      goScore.textContent = String(Math.floor(state.score));
+      goWave.textContent = String(state.wave);
+      goBest.textContent = String(best);
+      goSoldiers.textContent = String(Math.floor(player.soldiers));
+
+      goRareBoxes.textContent = String(state.rareBoxesBroken);
+      goMaxSoldiers.textContent = String(Math.floor(state.maxSoldiers));
+      goTime.textContent = fmtTime(state.playTime);
+
+      overlay.classList.add("show");
+    }
+
+    /* ===== INPUT ===== */
+    canvas.addEventListener("pointermove", (e) => {
+      const minX = bridge.x() - bridge.w()/2 + 40;
+      const maxX = bridge.x() + bridge.w()/2 - 40;
+      player.targetX = Math.max(minX, Math.min(maxX, e.clientX));
+    });
+
+    document.getElementById("goRestart").addEventListener("click", () => {
+      overlay.classList.remove("show");
+      initGame();
+      state.running = true;
+    });
+    document.getElementById("goClose").addEventListener("click", () => {
+      overlay.classList.remove("show");
+    });
+
+    /* ===== UPDATE / DRAW ===== */
+
+    function bulletHitsBoxSweep(b, boxX, boxY, halfW, halfH){
+      // Sweep test: checks segment from prevY -> y against AABB
+      // Quick x test first
+      if(b.x < boxX - halfW || b.x > boxX + halfW) return false;
+
+      const y0 = b.prevY;
+      const y1 = b.y;
+      const top = boxY - halfH;
+      const bot = boxY + halfH;
+
+      const segMin = Math.min(y0, y1);
+      const segMax = Math.max(y0, y1);
+
+      return segMax >= top && segMin <= bot;
     }
 
     function update(dt){
       player.x += (player.targetX - player.x) * 0.2;
+
+      state.playTime += dt;
+
+      if(state.xCanonTimer > 0){
+        state.xCanonTimer -= dt;
+        if(state.xCanonTimer < 0) state.xCanonTimer = 0;
+      }
+
       state.waveTimer += dt;
 
-      const spawnPerSec = (state.enemyCount * SETTINGS.SPAWN_REDUCTION) / SETTINGS.WAVE_DURATION;
+      // spawn rate: enemyCount per wave duration
+      const spawnPerSec = (state.enemyCount) / SETTINGS.WAVE_DURATION;
       state.spawnAccumulator += spawnPerSec * dt;
 
       while(state.spawnAccumulator >= 1 && state.enemySpawned < state.enemyCount){
+        // protect mobile: do not exceed active enemies cap
+        if(enemies.length >= SETTINGS.ACTIVE_ENEMY_CAP) break;
+
         spawnEnemy();
         state.spawnAccumulator -= 1;
         state.enemySpawned += 1;
@@ -478,6 +788,10 @@ button{
       }
 
       if(state.waveTimer >= SETTINGS.WAVE_DURATION){
+        // convert suppressed spawns (due to ACTIVE_ENEMY_CAP) into hp next wave
+        const unsent = Math.max(0, state.enemyCount - state.enemySpawned);
+        state.suppressedCarry += unsent;
+
         state.wave += 1;
         state.waveTimer = 0;
         state.enemySpawned = 0;
@@ -490,17 +804,33 @@ button{
         applyEnemyCapForWave();
       }
 
-      state.signTimer -= dt;
-      if(state.signTimer <= 0){
-        spawnSign();
-        state.signTimer = state.signRate;
+      state.dropTimer -= dt;
+      if(state.dropTimer <= 0){
+        spawnDrop();
+        state.dropTimer = SETTINGS.DROP_RATE;
       }
 
       shoot(dt);
 
-      for(const b of bullets) b.y -= SETTINGS.BULLET_SPEED * dt;
-      bullets = bullets.filter(b => b.y > -40 && !b.dead);
+      // Move bullets (store prevY for sweep collision)
+      const bulletSpeedMult = (state.xCanonTimer > 0) ? SETTINGS.XCANON_BULLET_SPEED_MULT : 1;
+      for(const b of bullets){
+        b.prevY = b.y;
+        b.y -= (SETTINGS.BULLET_SPEED * bulletSpeedMult) * dt;
+      }
+      bullets = bullets.filter(b => b.y > -60 && !b.dead);
 
+      // Bucket bullets by lane (major perf win)
+      const bulletsByLane = [[], [], []];
+      for(const b of bullets){
+        if(b.dead || b.power <= 0) continue;
+        const li = laneOfX(b.x);
+        bulletsByLane[li].push(b);
+      }
+
+      updateRareSway(dt);
+
+      // Enemy update + collision (use bulletsByLane[enemyLane] only)
       for(const e of enemies){
         let size = SETTINGS.ENEMY_SIZE;
         let speed = SETTINGS.ENEMY_SPEED;
@@ -508,17 +838,24 @@ button{
         if(e.type === "mid"){
           size = SETTINGS.MID_BOSS_SIZE;
           speed = SETTINGS.MID_BOSS_SPEED;
+          updateBossSway(e, dt, size);
         }else if(e.type === "big"){
           size = SETTINGS.BIG_BOSS_SIZE;
           speed = SETTINGS.ENEMY_SPEED * SETTINGS.BIG_BOSS_SPEED_MULT;
+          updateBossSway(e, dt, size);
+        }else{
+          // keep lane cached; enemies in middle lane mostly
+          e.lane = 1;
         }
 
         e.y += speed * dt;
 
-        for(const b of bullets){
+        const laneBullets = bulletsByLane[e.lane] || bulletsByLane[1];
+
+        for(const b of laneBullets){
           if(b.dead || b.power <= 0) continue;
 
-          if(Math.abs(b.x - e.x) < size/2 && Math.abs(b.y - e.y) < size/2){
+          if(bulletHitsBoxSweep(b, e.x, e.y, size/2, size/2)){
             const dmg = Math.min(b.power, e.hp);
             e.hp -= dmg;
             b.power -= dmg;
@@ -540,47 +877,120 @@ button{
       }
       enemies = enemies.filter(e => !e.dead);
 
+      // Rare collision (only lane 0 bullets)
       if(rare){
         const halfW = SETTINGS.RARE_W/2;
         const halfH = SETTINGS.RARE_H/2;
 
-        for(const b of bullets){
+        const lane0Bullets = bulletsByLane[0];
+
+        for(const b of lane0Bullets){
           if(b.dead || b.power <= 0) continue;
 
-          if(
-            b.x >= rare.x - halfW && b.x <= rare.x + halfW &&
-            b.y >= rare.y - halfH && b.y <= rare.y + halfH
-          ){
+          if(bulletHitsBoxSweep(b, rare.x, rare.y, halfW, halfH)){
             const dmg = Math.min(b.power, rare.hp);
             rare.hp -= dmg;
             b.power -= dmg;
-
             if(b.power <= 0) b.dead = true;
           }
         }
 
         if(rare.hp <= 0){
-          state.signValue += 1;
-          state.lastRareHP = Math.floor(state.lastRareHP * 1.6 + (player.soldiers * 1.2));
+          state.rareBoxesBroken += 1;
+
+          state.dropValue += 1;
+
+          // keep your scaling but slightly calmer to reduce runaway
+          state.lastRareHP = Math.floor(state.lastRareHP * 1.5 + (player.soldiers * 1.1));
+
           spawnRare();
         }
       }
 
-      for(const s of signs){
-        s.y += 150 * dt;
+      // Drops
+      for(const d of drops){
+        d.y += SETTINGS.DROP_FALL_SPEED * dt;
 
-        if(Math.abs(s.y - defenseY()) < 40 && Math.abs(player.x - s.x) < 40){
-          player.soldiers += s.value;
-          s.dead = true;
+        if(Math.abs(d.y - defenseY()) < 40 && Math.abs(player.x - d.x) < 46){
+          applyDropEffect(d);
+          d.dead = true;
         }
-        if(s.y > H + 40) s.dead = true;
+        if(d.y > H + 60) d.dead = true;
       }
-      signs = signs.filter(s => !s.dead);
+      drops = drops.filter(d => !d.dead);
+
+      if(player.soldiers > state.maxSoldiers) state.maxSoldiers = player.soldiers;
 
       if(player.soldiers <= 0){
         player.soldiers = 0;
         state.running = false;
-        openGameOver(); // ✅ popup
+        openGameOver();
+      }
+    }
+
+    function drawDrop(d){
+      const w = SETTINGS.DROP_W;
+      const h = SETTINGS.DROP_H;
+
+      const isRainbow = (d.kind === "xcanon" || d.kind === "inc5" || d.kind === "inc10" || d.kind === "multDrop2");
+
+      if(isRainbow){
+        const g = ctx.createLinearGradient(d.x - w/2, d.y, d.x + w/2, d.y + h);
+        g.addColorStop(0, "rgba(255,80,80,0.95)");
+        g.addColorStop(0.33, "rgba(255,220,80,0.95)");
+        g.addColorStop(0.66, "rgba(80,220,255,0.95)");
+        g.addColorStop(1, "rgba(180,80,255,0.95)");
+        ctx.fillStyle = g;
+
+      }else if(d.kind === "div2" || d.kind === "spdDown"){
+        ctx.fillStyle = "rgba(255,70,70,0.92)";
+
+      }else if(d.kind === "mult2" || d.kind === "spdUp"){
+        ctx.fillStyle = "rgba(255,215,80,0.92)";
+
+      }else{
+        ctx.fillStyle = "rgba(120,255,140,0.92)";
+      }
+
+      ctx.fillRect(d.x - w/2, d.y, w, h);
+
+      ctx.fillStyle = "rgba(0,0,0,0.70)";
+      ctx.font = "bold 14px system-ui";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(dropLabel(d), d.x, d.y + h/2);
+    }
+
+    function drawEnemy(e){
+      let size = SETTINGS.ENEMY_SIZE;
+      if(e.type === "mid") size = SETTINGS.MID_BOSS_SIZE;
+      if(e.type === "big") size = SETTINGS.BIG_BOSS_SIZE;
+
+      ctx.fillStyle = (e.type === "big") ? "purple" : getEnemyColor(e.maxHp);
+      ctx.fillRect(e.x - size/2, e.y - size/2, size, size);
+
+      if(e.type === "mid" || e.type === "big"){
+        ctx.fillStyle = "lime";
+        ctx.fillRect(
+          e.x - size/2,
+          e.y - size/2 - 10,
+          size * (e.hp/e.maxHp),
+          6
+        );
+      }
+
+      // PERFORMANCE: avoid fillText on thousands of enemies.
+      // Show normal HP only when enemy count is small (or hp > 1), otherwise skip.
+      const showHp =
+        (e.type === "mid" || e.type === "big") ||
+        (e.type === "normal" && enemies.length < 220 && e.maxHp > 1);
+
+      if(showHp){
+        ctx.fillStyle = (e.type === "normal") ? "rgba(0,0,0,0.75)" : "white";
+        ctx.font = (e.type === "normal") ? "bold 12px system-ui" : "bold 16px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(Math.floor(e.hp), e.x, e.y);
       }
     }
 
@@ -590,13 +1000,35 @@ button{
       const bridgeLeft = bridge.x() - bridge.w()/2;
       const dY = defenseY();
 
+      // Background WAVE text (2 lines, mobile readable)
+      const isMobile = W < 720;
+
       ctx.save();
-      ctx.globalAlpha = 0.06;
+      ctx.globalAlpha = isMobile ? 0.16 : 0.08;
       ctx.fillStyle = "#fff";
-      ctx.font = "900 160px system-ui";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText("WAVE " + state.wave, bridge.laneX(1), H*0.55);
+
+      ctx.font = "900 " + (isMobile ? 88 : 160) + "px system-ui";
+      ctx.fillText("WAVE", bridge.laneX(1), H * 0.45);
+
+      ctx.font = "900 " + (isMobile ? 120 : 210) + "px system-ui";
+      ctx.fillText(String(state.wave), bridge.laneX(1), H * 0.67);
+
+      ctx.restore();
+
+      // HUD WAVE (top center)
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.90)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+
+      ctx.font = "900 18px system-ui";
+      ctx.fillText("WAVE", bridge.laneX(1), 34);
+
+      ctx.font = "900 28px system-ui";
+      ctx.fillText(String(state.wave), bridge.laneX(1), 62);
+
       ctx.restore();
 
       ctx.fillStyle = "rgba(255,255,255,0.05)";
@@ -625,8 +1057,8 @@ button{
       ctx.textBaseline = "alphabetic";
       ctx.fillText("Score: " + state.score, 20, 50);
 
-      // Soldier bar (orange-red)
-      const barX = 20, barY = 70, barW = 320, barH = 18;
+      // Soldier bar
+      const barX = 20, barY = 70, barW = 340, barH = 18;
       ctx.fillStyle = "rgba(0,0,0,0.38)";
       ctx.fillRect(barX, barY, barW, barH);
       ctx.strokeStyle = "rgba(255,255,255,0.18)";
@@ -642,9 +1074,6 @@ button{
         grad.addColorStop(1, "rgba(255,60,60,0.95)");
         ctx.fillStyle = grad;
         ctx.fillRect(barX, barY, fillW, barH);
-
-        ctx.fillStyle = "rgba(255,255,255,0.18)";
-        ctx.fillRect(barX, barY + 2, fillW, 2);
       }
 
       ctx.font = "bold 14px system-ui";
@@ -653,7 +1082,13 @@ button{
       ctx.shadowColor = "rgba(0,0,0,0.8)";
       ctx.shadowBlur = 4;
       ctx.fillStyle = "rgba(255, 235, 200, 0.98)";
-      ctx.fillText("Soldiers: " + Math.floor(player.soldiers), barX + 10, barY + 14);
+      ctx.fillText(
+        "Soldiers: " + Math.floor(player.soldiers) +
+        "   Drop: +" + state.dropValue +
+        "   SPD x" + (1/state.fireRateScale).toFixed(2) +
+        "   Enemies: " + enemies.length,
+        barX + 10, barY + 14
+      );
       ctx.shadowBlur = 0;
 
       // Rare
@@ -693,6 +1128,15 @@ button{
       ctx.textBaseline = "middle";
       ctx.fillText(Math.floor(player.soldiers), player.x, dY - SETTINGS.PLAYER_H/2);
 
+      // X-Canon countdown
+      if(state.xCanonTimer > 0){
+        ctx.fillStyle = "rgba(0,0,0,0.75)";
+        ctx.font = "bold 12px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillText("X-Canon " + Math.ceil(state.xCanonTimer) + "s", player.x, dY - SETTINGS.PLAYER_H - 6);
+      }
+
       // Bullets
       for(const b of bullets){
         if(b.dead) continue;
@@ -700,69 +1144,32 @@ button{
         ctx.fillRect(b.x, b.y, SETTINGS.BULLET_SIZE, SETTINGS.BULLET_SIZE);
       }
 
-      // layer: normal enemies then bosses
+      // Enemies with boss-on-top layering
       const normals = [];
       const bosses = [];
       for(const e of enemies){
         if(e.type === "mid" || e.type === "big") bosses.push(e);
         else normals.push(e);
       }
-
-      function drawEnemy(e){
-        let size = SETTINGS.ENEMY_SIZE;
-        if(e.type === "mid") size = SETTINGS.MID_BOSS_SIZE;
-        if(e.type === "big") size = SETTINGS.BIG_BOSS_SIZE;
-
-        ctx.fillStyle = (e.type === "big") ? "purple" : getEnemyColor(e.maxHp);
-        ctx.fillRect(e.x - size/2, e.y - size/2, size, size);
-
-        if(e.type === "mid" || e.type === "big"){
-          ctx.fillStyle = "lime";
-          ctx.fillRect(
-            e.x - size/2,
-            e.y - size/2 - 10,
-            size * (e.hp/e.maxHp),
-            6
-          );
-        }
-
-        ctx.fillStyle = (e.type === "normal") ? "rgba(0,0,0,0.75)" : "white";
-        ctx.font = (e.type === "normal") ? "bold 12px system-ui" : "bold 16px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(Math.floor(e.hp), e.x, e.y);
-      }
-
       for(const e of normals) drawEnemy(e);
       for(const e of bosses) drawEnemy(e);
 
-      // Signs
-      for(const s of signs){
-        ctx.fillStyle = "lightgreen";
-        ctx.fillRect(
-          s.x - SETTINGS.SIGN_W/2,
-          s.y,
-          SETTINGS.SIGN_W,
-          SETTINGS.SIGN_H
-        );
-        ctx.fillStyle = "black";
-        ctx.font = "bold 16px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("+" + s.value, s.x, s.y + SETTINGS.SIGN_H/2);
-      }
+      // Drops
+      for(const d of drops) drawDrop(d);
     }
 
     let last = performance.now();
     function loop(now){
-      const dt = (now-last)/1000;
+      const rawDt = (now-last)/1000;
       last = now;
+
+      // Clamp dt to protect from spikes (tab switching, lag)
+      const dt = Math.min(rawDt, SETTINGS.MAX_DT);
 
       if(state.running) update(dt);
       draw();
       requestAnimationFrame(loop);
     }
-    requestAnimationFrame(loop);
 
     // UI buttons
     document.getElementById("btnStart").addEventListener("click", () => {
@@ -778,7 +1185,7 @@ button{
     });
 
     initGame();
-    errorBox.style.display = "none";
+    requestAnimationFrame(loop);
   });
 })();
 </script>
