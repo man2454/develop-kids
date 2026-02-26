@@ -14,6 +14,7 @@ html,body{
   font-family:system-ui;
 }
 canvas{display:block;width:100vw;height:100vh;}
+
 .ui{
   position:fixed;
   top:50%;
@@ -30,6 +31,7 @@ button{
   font-weight:700;
   cursor:pointer;
 }
+
 #errorBox{
   position:fixed;
   left:12px;
@@ -43,8 +45,79 @@ button{
   border-radius:10px;
   font:12px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   display:none;
-  z-index:20;
+  z-index:30;
 }
+
+/* ===== GAME OVER POPUP ===== */
+.overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:25;
+  background:rgba(0,0,0,0.55);
+  backdrop-filter: blur(3px);
+}
+.overlay.show{ display:flex; }
+
+.modal{
+  width:min(420px, calc(100vw - 28px));
+  border-radius:16px;
+  padding:18px 18px 14px;
+  background:rgba(15,20,35,0.92);
+  border:1px solid rgba(255,255,255,0.18);
+  box-shadow:0 18px 60px rgba(0,0,0,0.45);
+  color:#fff;
+  text-align:center;
+}
+.modal h2{
+  margin:4px 0 12px;
+  font-size:28px;
+  letter-spacing:0.5px;
+}
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:10px 0 14px;
+}
+.stat{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;
+  padding:10px 10px 8px;
+}
+.stat .k{
+  font-size:12px;
+  opacity:0.8;
+}
+.stat .v{
+  font-size:20px;
+  font-weight:800;
+  margin-top:2px;
+}
+.modal .row{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  margin-top:8px;
+}
+.modal .btn{
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+}
+.btn.primary{ background:rgba(255,70,70,0.95); color:#fff; }
+.btn.ghost{ background:rgba(255,255,255,0.12); color:#fff; }
+.small{
+  margin-top:10px;
+  opacity:0.75;
+  font-size:12px;
+}
+
 </style>
 </head>
 <body>
@@ -53,6 +126,23 @@ button{
   <button id="btnStart">Start</button>
   <button id="btnPause">Pause</button>
   <button id="btnRestart">Restart</button>
+</div>
+
+<div class="overlay" id="gameOverOverlay">
+  <div class="modal">
+    <h2>GAME OVER</h2>
+    <div class="stats">
+      <div class="stat"><div class="k">Score</div><div class="v" id="goScore">0</div></div>
+      <div class="stat"><div class="k">Wave</div><div class="v" id="goWave">1</div></div>
+      <div class="stat"><div class="k">Best Score</div><div class="v" id="goBest">0</div></div>
+      <div class="stat"><div class="k">Soldiers</div><div class="v" id="goSoldiers">0</div></div>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="goRestart">Restart</button>
+      <button class="btn ghost" id="goClose">Close</button>
+    </div>
+    <div class="small">Tip: On mobile, the popup helps when enemies overlap the HUD.</div>
+  </div>
 </div>
 
 <pre id="errorBox"></pre>
@@ -83,6 +173,47 @@ button{
     if(!canvas) { showError("Canvas element not found (#c)"); return; }
     if(!ctx) { showError("Canvas context is null (getContext failed)"); return; }
 
+    /* ===== POPUP HELPERS ===== */
+    const overlay = document.getElementById("gameOverOverlay");
+    const goScore = document.getElementById("goScore");
+    const goWave = document.getElementById("goWave");
+    const goBest = document.getElementById("goBest");
+    const goSoldiers = document.getElementById("goSoldiers");
+
+    function getBestScore(){
+      const v = Number(localStorage.getItem("bestScore") || "0");
+      return Number.isFinite(v) ? v : 0;
+    }
+    function setBestScore(v){
+      localStorage.setItem("bestScore", String(Math.floor(v)));
+    }
+    function openGameOver(){
+      // pause
+      state.running = false;
+
+      const best = Math.max(getBestScore(), Math.floor(state.score));
+      setBestScore(best);
+
+      goScore.textContent = String(Math.floor(state.score));
+      goWave.textContent = String(state.wave);
+      goBest.textContent = String(best);
+      goSoldiers.textContent = String(Math.floor(player.soldiers));
+
+      overlay.classList.add("show");
+    }
+    function closeGameOver(){
+      overlay.classList.remove("show");
+    }
+
+    document.getElementById("goRestart").addEventListener("click", () => {
+      closeGameOver();
+      initGame();
+      state.running = true;
+    });
+    document.getElementById("goClose").addEventListener("click", () => {
+      closeGameOver();
+    });
+
     const SETTINGS = {
       WAVE_DURATION: 45,
       SPAWN_REDUCTION: 0.8,
@@ -112,7 +243,6 @@ button{
 
       DEFENSE_LINE: 0.85,
 
-      // performance cap
       MAX_ENEMIES_PER_WAVE: 10000
     };
 
@@ -131,7 +261,7 @@ button{
       const ui = document.getElementById("ui");
       if(!ui) return;
       const laneLeft = bridge.x() - bridge.w()/2;
-      const desired = laneLeft - 140;     // outside lane
+      const desired = laneLeft - 140;
       const clamped = Math.max(12, desired);
       ui.style.left = clamped + "px";
     }
@@ -144,7 +274,6 @@ button{
     window.addEventListener("resize", resize);
     resize();
 
-    // ===== STATE =====
     function getInitialState(){
       return {
         running:false,
@@ -201,12 +330,14 @@ button{
     }
 
     function initGame(){
+      closeGameOver();
+
       state = getInitialState();
 
       player.x = bridge.laneX(1);
       player.targetX = bridge.laneX(1);
       player.fireCD = 0;
-      player.soldiers = 1;
+      player.soldiers = 15;
 
       enemies = [];
       bullets = [];
@@ -217,14 +348,12 @@ button{
       spawnRare();
     }
 
-    // ===== INPUT =====
     canvas.addEventListener("pointermove", (e) => {
       const minX = bridge.x() - bridge.w()/2 + 40;
       const maxX = bridge.x() + bridge.w()/2 - 40;
       player.targetX = Math.max(minX, Math.min(maxX, e.clientX));
     });
 
-    // ===== COLORS =====
     function getEnemyColor(hp){
       const hue = (hp*35) % 360;
       return `hsl(${hue},70%,50%)`;
@@ -235,14 +364,13 @@ button{
       return `hsl(${hue},100%,55%)`;
     }
 
-    // ===== SPAWN =====
     function enemyHPByProgress(progress){
       let hp = 1 + Math.floor(state.wave/2);
       if(progress > 0.40) hp += 1;
       if(progress > 0.70) hp += 1;
       if(progress > 0.90) hp += 1;
 
-      hp += state.hpBoost; // overflow -> hp
+      hp += state.hpBoost;
       return Math.max(1, hp);
     }
 
@@ -259,7 +387,7 @@ button{
       });
     }
 
-    function spawnMidBoss(mult, whenSec){
+    function spawnMidBoss(mult){
       const base = Math.max(10, Math.floor(state.desiredEnemyCount * mult));
       const hp = base + (state.hpBoost * 40);
       enemies.push({
@@ -267,8 +395,7 @@ button{
         y: -50,
         hp,
         maxHp: hp,
-        type: "mid",
-        label: (whenSec === 13 ? "13s" : "40s")
+        type: "mid"
       });
     }
 
@@ -301,7 +428,6 @@ button{
       });
     }
 
-    // ===== SHOOT (POWER BULLETS) =====
     function shoot(dt){
       player.fireCD -= dt;
       if(player.fireCD > 0) return;
@@ -324,7 +450,6 @@ button{
       }
     }
 
-    // ===== UPDATE =====
     function update(dt){
       player.x += (player.targetX - player.x) * 0.2;
       state.waveTimer += dt;
@@ -339,11 +464,11 @@ button{
       }
 
       if(state.waveTimer >= 13 && !state.boss13){
-        spawnMidBoss(1, 13);
+        spawnMidBoss(1);
         state.boss13 = true;
       }
       if(state.waveTimer >= 40 && !state.boss40){
-        spawnMidBoss(1.5, 40);
+        spawnMidBoss(1.5);
         state.boss40 = true;
       }
 
@@ -455,17 +580,16 @@ button{
       if(player.soldiers <= 0){
         player.soldiers = 0;
         state.running = false;
+        openGameOver(); // ✅ popup
       }
     }
 
-    // ===== DRAW =====
     function draw(){
       ctx.clearRect(0,0,W,H);
 
       const bridgeLeft = bridge.x() - bridge.w()/2;
       const dY = defenseY();
 
-      // wave background
       ctx.save();
       ctx.globalAlpha = 0.06;
       ctx.fillStyle = "#fff";
@@ -475,7 +599,6 @@ button{
       ctx.fillText("WAVE " + state.wave, bridge.laneX(1), H*0.55);
       ctx.restore();
 
-      // lanes
       ctx.fillStyle = "rgba(255,255,255,0.05)";
       ctx.fillRect(bridgeLeft, 0, bridge.w(), H);
 
@@ -502,9 +625,8 @@ button{
       ctx.textBaseline = "alphabetic";
       ctx.fillText("Score: " + state.score, 20, 50);
 
-      // ✅ Soldier bar (ORANGE-RED)
+      // Soldier bar (orange-red)
       const barX = 20, barY = 70, barW = 320, barH = 18;
-
       ctx.fillStyle = "rgba(0,0,0,0.38)";
       ctx.fillRect(barX, barY, barW, barH);
       ctx.strokeStyle = "rgba(255,255,255,0.18)";
@@ -578,7 +700,7 @@ button{
         ctx.fillRect(b.x, b.y, SETTINGS.BULLET_SIZE, SETTINGS.BULLET_SIZE);
       }
 
-      // Layer fix: normal enemies then bosses
+      // layer: normal enemies then bosses
       const normals = [];
       const bosses = [];
       for(const e of enemies){
@@ -631,7 +753,6 @@ button{
       }
     }
 
-    // ===== LOOP =====
     let last = performance.now();
     function loop(now){
       const dt = (now-last)/1000;
@@ -643,7 +764,7 @@ button{
     }
     requestAnimationFrame(loop);
 
-    // ===== UI =====
+    // UI buttons
     document.getElementById("btnStart").addEventListener("click", () => {
       initGame();
       state.running = true;
