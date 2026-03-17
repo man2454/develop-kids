@@ -3,7 +3,7 @@
 Play here:
 - Fire: https://man2454.github.io/develop-kids/
 - XO: https://man2454.github.io/develop-kids/xo.html
-- XO: https://man2454.github.io/develop-kids/dodge.html
+- Neo Dodge: https://man2454.github.io/develop-kids/dodge.html
 
 ## Why I made this
 I keep seeing a lot of ads that show “fun looking” lane / wave defense gameplay — but many of them don’t actually have a real playable game behind the ad.  
