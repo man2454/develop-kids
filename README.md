@@ -2,7 +2,7 @@
 
 Play here:
 - Fire: https://man2454.github.io/develop-kids/
-- OX: https://man2454.github.io/develop-kids/ox.html
+- XO: https://man2454.github.io/develop-kids/ox.html
 
 ## Why I made this
 I keep seeing a lot of ads that show “fun looking” lane / wave defense gameplay — but many of them don’t actually have a real playable game behind the ad.  
