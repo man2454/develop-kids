@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neon Dodge Endless</title>
+  <style>
+    :root {
+      --bg-a: #050816;
+      --bg-b: #0c1633;
+      --panel: rgba(11, 18, 40, 0.72);
+      --line: rgba(255,255,255,0.12);
+      --text: #eaf2ff;
+      --muted: #9bb0d1;
+      --cyan: #45e7ff;
+      --pink: #ff59c7;
+      --violet: #8a7dff;
+      --gold: #ffd86b;
+      --green: #54f0a4;
+      --danger: #ff6d87;
+      --shadow: 0 18px 60px rgba(0,0,0,0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(69,231,255,0.12), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(255,89,199,0.14), transparent 26%),
+        radial-gradient(circle at 50% 85%, rgba(138,125,255,0.12), transparent 30%),
+        linear-gradient(160deg, var(--bg-a), var(--bg-b));
+      overflow: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.16;
+      z-index: 0;
+      pointer-events: none;
+      animation: drift 10s ease-in-out infinite;
+    }
+
+    body::before {
+      left: -60px;
+      top: -40px;
+      background: var(--cyan);
+    }
+
+    body::after {
+      right: -60px;
+      bottom: -40px;
+      background: var(--pink);
+      animation-delay: -4s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(20px) scale(1.08); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) 1fr;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+    }
+
+    .hud {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.98rem;
+      margin-top: 8px;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    .big {
+      font-size: 1.9rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .mini {
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .cyan { color: var(--cyan); text-shadow: 0 0 12px rgba(69,231,255,0.5); }
+    .pink { color: var(--pink); text-shadow: 0 0 12px rgba(255,89,199,0.45); }
+    .gold { color: var(--gold); text-shadow: 0 0 12px rgba(255,216,107,0.4); }
+    .green { color: var(--green); text-shadow: 0 0 12px rgba(84,240,164,0.35); }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    button, select {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      color: var(--text);
+      outline: none;
+    }
+
+    select {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    button {
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.14s ease, filter 0.14s ease;
+      box-shadow: 0 12px 22px rgba(0,0,0,0.22);
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), #5977ff);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, var(--pink), #965bff);
+    }
+
+    .btn-ghost {
+      background: linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.07));
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .game-wrap {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    canvas {
+      width: min(100%, 980px);
+      height: min(calc(100vh - 76px), 780px);
+      max-height: 780px;
+      border-radius: 28px;
+      background:
+        radial-gradient(circle at top, rgba(69,231,255,0.08), transparent 35%),
+        linear-gradient(180deg, rgba(3,8,22,0.98), rgba(8,16,40,0.98));
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35), inset 0 0 40px rgba(69,231,255,0.06);
+    }
+
+    .overlay-tip {
+      position: absolute;
+      left: 40px;
+      top: 40px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(10,15,35,0.58);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.92rem;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    @media (max-width: 980px) {
+      .app {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+
+      .game-wrap {
+        padding: 0;
+      }
+
+      canvas {
+        height: min(60vh, 620px);
+      }
+
+      .overlay-tip {
+        left: 20px;
+        top: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="panel hud">
+      <div>
+        <h1 class="title">Neon Dodge</h1>
+        <div class="subtitle">เกมหลบสิ่งกีดขวางแบบ endless สไตล์ neon glow เล่นได้ทันทีใน HTML5 ใช้เมาส์หรือปุ่มลูกศรซ้ายขวา</div>
+      </div>
+
+      <div class="card">
+        <div class="label">สถานะ</div>
+        <div class="big cyan" id="statusText">กด Start เพื่อเริ่ม</div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="label">Score</div>
+          <div class="mini gold" id="scoreText">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Best</div>
+          <div class="mini pink" id="bestText">0</div>
+        </div>
+        <div class="card">
+          <div class="label">Speed</div>
+          <div class="mini green" id="speedText">1.0x</div>
+        </div>
+        <div class="card">
+          <div class="label">Lives</div>
+          <div class="mini cyan" id="livesText">3</div>
+        </div>
+      </div>
+
+      <div class="card controls">
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button class="btn-primary" id="startBtn">Start Game</button>
+        <button class="btn-secondary" id="restartBtn">Restart</button>
+        <button class="btn-ghost" id="pauseBtn">Pause</button>
+      </div>
+
+      <div class="card help">
+        <strong>วิธีเล่น</strong><br>
+        หลบ block สีอันตรายให้นานที่สุด เก็บ orb สีทองเพื่อเพิ่มคะแนนและพลังชีวิตเล็กน้อยเมื่อผ่านช่วงยาก ๆ เกมจะเร็วขึ้นเรื่อย ๆ
+        <br><br>
+        <strong>ควบคุม</strong><br>
+        Mouse / Touch drag, ปุ่ม ← →, หรือ A / D
+      </div>
+    </aside>
+
+    <section class="panel game-wrap">
+      <div class="overlay-tip">Avoid red blocks • Collect gold orbs • Survive longer</div>
+      <canvas id="game" width="980" height="780"></canvas>
+    </section>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const statusText = document.getElementById('statusText');
+    const scoreText = document.getElementById('scoreText');
+    const bestText = document.getElementById('bestText');
+    const speedText = document.getElementById('speedText');
+    const livesText = document.getElementById('livesText');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const difficultyEl = document.getElementById('difficulty');
+
+    const DPR = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+    const baseWidth = 980;
+    const baseHeight = 780;
+    canvas.width = baseWidth * DPR;
+    canvas.height = baseHeight * DPR;
+    ctx.scale(DPR, DPR);
+
+    const W = baseWidth;
+    const H = baseHeight;
+    const centerX = () => player.x + player.w * 0.5;
+
+    let bestScore = Number(localStorage.getItem('neon-dodge-best') || 0);
+    bestText.textContent = bestScore;
+
+    let state;
+    let lastTime = 0;
+    let animationId = null;
+    let paused = false;
+    let started = false;
+    let pointerActive = false;
+    let pointerOffset = 0;
+
+    const player = {
+      x: W / 2 - 28,
+      y: H - 120,
+      w: 56,
+      h: 56,
+      targetX: W / 2 - 28,
+      vx: 0,
+      hitTimer: 0,
+      pulse: 0
+    };
+
+    const keys = { left: false, right: false };
+
+    function resetGame() {
+      state = {
+        score: 0,
+        speed: 1,
+        lives: 3,
+        time: 0,
+        distance: 0,
+        obstacleTimer: 0,
+        orbTimer: 0,
+        particles: [],
+        obstacles: [],
+        orbs: [],
+        stars: createStars(90),
+        flash: 0,
+        gameOver: false
+      };
+
+      player.x = W / 2 - player.w / 2;
+      player.targetX = player.x;
+      player.vx = 0;
+      player.hitTimer = 0;
+      player.pulse = 0;
+      paused = false;
+      updateHud();
+      statusText.textContent = 'พร้อมแล้ว ไปกันเลย';
+    }
+
+    function createStars(count) {
+      return Array.from({ length: count }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        z: Math.random() * 2 + 0.6,
+        size: Math.random() * 2 + 0.8
+      }));
+    }
+
+    function difficultyConfig() {
+      const level = difficultyEl.value;
+      if (level === 'easy') {
+        return { spawnBase: 0.92, spawnRamp: 0.0035, speedBase: 260, speedRamp: 8 };
+      }
+      if (level === 'hard') {
+        return { spawnBase: 0.62, spawnRamp: 0.0052, speedBase: 340, speedRamp: 15 };
+      }
+      return { spawnBase: 0.76, spawnRamp: 0.0044, speedBase: 300, speedRamp: 11 };
+    }
+
+    function updateHud() {
+      scoreText.textContent = Math.floor(state.score);
+      bestText.textContent = bestScore;
+      speedText.textContent = state.speed.toFixed(1) + 'x';
+      livesText.textContent = state.lives;
+    }
+
+    function startGame() {
+      if (!started) {
+        started = true;
+        resetGame();
+        lastTime = performance.now();
+        animationId = requestAnimationFrame(loop);
+      } else if (state.gameOver) {
+        resetGame();
+      }
+      statusText.textContent = 'กำลังเล่นอยู่';
+      paused = false;
+    }
+
+    function togglePause() {
+      if (!started || state.gameOver) return;
+      paused = !paused;
+      statusText.textContent = paused ? 'หยุดชั่วคราว' : 'กำลังเล่นอยู่';
+    }
+
+    function spawnObstacle() {
+      const cfg = difficultyConfig();
+      const width = 70 + Math.random() * 110;
+      const height = 18 + Math.random() * 26;
+      const x = 24 + Math.random() * (W - width - 48);
+      const speed = cfg.speedBase + state.speed * cfg.speedRamp * 10 + Math.random() * 55;
+      const typeRoll = Math.random();
+      const obstacle = {
+        x,
+        y: -height - 30,
+        w: width,
+        h: height,
+        speed,
+        glow: 0.7 + Math.random() * 0.8,
+        drift: (Math.random() - 0.5) * 20,
+        phase: Math.random() * Math.PI * 2,
+        type: typeRoll > 0.8 ? 'wide' : 'normal'
+      };
+      if (obstacle.type === 'wide') {
+        obstacle.h += 10;
+        obstacle.w += 40;
+      }
+      state.obstacles.push(obstacle);
+    }
+
+    function spawnOrb() {
+      const r = 11 + Math.random() * 7;
+      state.orbs.push({
+        x: 30 + Math.random() * (W - 60),
+        y: -30,
+        r,
+        speed: 210 + Math.random() * 70 + state.speed * 20,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
+    function emitBurst(x, y, color, count = 12) {
+      for (let i = 0; i < count; i++) {
+        state.particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 220,
+          vy: (Math.random() - 0.5) * 220,
+          life: 0.45 + Math.random() * 0.45,
+          size: 2 + Math.random() * 4,
+          color
+        });
+      }
+    }
+
+    function rectHit(a, b) {
+      return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    }
+
+    function circleRectHit(circle, rect) {
+      const testX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.w));
+      const testY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.h));
+      const dx = circle.x - testX;
+      const dy = circle.y - testY;
+      return dx * dx + dy * dy <= circle.r * circle.r;
+    }
+
+    function update(dt) {
+      if (paused || state.gameOver) return;
+
+      const cfg = difficultyConfig();
+      state.time += dt;
+      state.distance += 180 * dt * state.speed;
+      state.score += dt * 12 * state.speed;
+      state.speed = 1 + Math.min(2.7, state.time * 0.05);
+      state.flash = Math.max(0, state.flash - dt * 2.8);
+
+      if (player.hitTimer > 0) player.hitTimer -= dt;
+      player.pulse += dt * 5;
+
+      if (keys.left) player.targetX -= 520 * dt;
+      if (keys.right) player.targetX += 520 * dt;
+      player.targetX = Math.max(26, Math.min(W - player.w - 26, player.targetX));
+      player.x += (player.targetX - player.x) * Math.min(1, dt * 13);
+
+      state.obstacleTimer += dt;
+      state.orbTimer += dt;
+
+      const spawnEvery = Math.max(0.26, cfg.spawnBase - state.time * cfg.spawnRamp);
+      if (state.obstacleTimer >= spawnEvery) {
+        state.obstacleTimer = 0;
+        spawnObstacle();
+      }
+
+      if (state.orbTimer >= 1.6) {
+        state.orbTimer = 0;
+        if (Math.random() < 0.78) spawnOrb();
+      }
+
+      for (const star of state.stars) {
+        star.y += 16 * star.z * dt + state.speed * 18 * dt;
+        if (star.y > H + 5) {
+          star.y = -5;
+          star.x = Math.random() * W;
+        }
+      }
+
+      for (const ob of state.obstacles) {
+        ob.phase += dt * 2;
+        ob.x += Math.sin(ob.phase) * ob.drift * dt;
+        ob.y += ob.speed * dt;
+      }
+
+      for (const orb of state.orbs) {
+        orb.phase += dt * 3;
+        orb.y += orb.speed * dt;
+        orb.x += Math.sin(orb.phase) * 26 * dt;
+      }
+
+      const playerBox = { x: player.x, y: player.y, w: player.w, h: player.h };
+
+      for (let i = state.obstacles.length - 1; i >= 0; i--) {
+        const ob = state.obstacles[i];
+        if (rectHit(playerBox, ob)) {
+          state.obstacles.splice(i, 1);
+          state.lives -= 1;
+          player.hitTimer = 0.7;
+          state.flash = 1;
+          emitBurst(centerX(), player.y + player.h / 2, '#ff6d87', 18);
+          if (state.lives <= 0) {
+            gameOver();
+            return;
+          }
+          continue;
+        }
+        if (ob.y > H + 80) {
+          state.obstacles.splice(i, 1);
+          state.score += 8;
+        }
+      }
+
+      for (let i = state.orbs.length - 1; i >= 0; i--) {
+        const orb = state.orbs[i];
+        if (circleRectHit(orb, playerBox)) {
+          state.orbs.splice(i, 1);
+          state.score += 35;
+          if (state.lives < 5 && Math.random() < 0.18) state.lives += 1;
+          emitBurst(orb.x, orb.y, '#ffd86b', 14);
+          continue;
+        }
+        if (orb.y > H + 50) state.orbs.splice(i, 1);
+      }
+
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
+
+      updateHud();
+    }
+
+    function gameOver() {
+      state.gameOver = true;
+      statusText.textContent = 'Game Over';
+      bestScore = Math.max(bestScore, Math.floor(state.score));
+      localStorage.setItem('neon-dodge-best', String(bestScore));
+      updateHud();
+      emitBurst(centerX(), player.y + player.h / 2, '#45e7ff', 30);
+    }
+
+    function drawGlowRect(x, y, w, h, color, glow) {
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18 * glow;
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, color);
+      grad.addColorStop(1, 'rgba(255,255,255,0.18)');
+      ctx.fillStyle = grad;
+      roundRect(ctx, x, y, w, h, 12);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawPlayer() {
+      ctx.save();
+      const x = player.x;
+      const y = player.y;
+      const pulse = Math.sin(player.pulse) * 3;
+      const alpha = player.hitTimer > 0 ? 0.6 + Math.sin(performance.now() * 0.04) * 0.2 : 1;
+      ctx.globalAlpha = alpha;
+
+      ctx.shadowColor = '#45e7ff';
+      ctx.shadowBlur = 24;
+      const grad = ctx.createLinearGradient(x, y, x + player.w, y + player.h);
+      grad.addColorStop(0, '#45e7ff');
+      grad.addColorStop(1, '#8a7dff');
+      ctx.fillStyle = grad;
+      roundRect(ctx, x, y + pulse, player.w, player.h, 18);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = 2;
+      roundRect(ctx, x + 5, y + 5 + pulse, player.w - 10, player.h - 10, 14);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.arc(x + player.w / 2, y + player.h / 2 + pulse, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawOrb(orb) {
+      ctx.save();
+      ctx.shadowColor = '#ffd86b';
+      ctx.shadowBlur = 18;
+      const g = ctx.createRadialGradient(orb.x, orb.y, 2, orb.x, orb.y, orb.r);
+      g.addColorStop(0, 'rgba(255,255,255,0.95)');
+      g.addColorStop(0.35, '#ffd86b');
+      g.addColorStop(1, 'rgba(255,216,107,0.08)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawParticles() {
+      for (const p of state.particles) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawStars() {
+      for (const s of state.stars) {
+        ctx.save();
+        ctx.globalAlpha = 0.35 + s.z * 0.18;
+        ctx.fillStyle = '#b9d7ff';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function drawLanes() {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 2;
+      const laneCount = 5;
+      for (let i = 1; i < laneCount; i++) {
+        const x = (W / laneCount) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, H);
+        ctx.stroke();
+      }
+
+      for (let y = 0; y < H; y += 50) {
+        ctx.fillStyle = 'rgba(69,231,255,0.03)';
+        ctx.fillRect(0, (y + state.distance * 0.4) % H, W, 1);
+      }
+      ctx.restore();
+    }
+
+    function drawTopHud() {
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = '700 20px Inter, sans-serif';
+      ctx.fillText('SCORE  ' + Math.floor(state.score), 28, 36);
+      ctx.fillStyle = 'rgba(155,176,209,0.95)';
+      ctx.font = '600 16px Inter, sans-serif';
+      ctx.fillText('BEST  ' + bestScore, 28, 62);
+      ctx.fillText('LIVES  ' + state.lives, W - 120, 36);
+      ctx.fillText('SPEED  ' + state.speed.toFixed(1) + 'x', W - 136, 62);
+      ctx.restore();
+    }
+
+    function drawCenterMessage() {
+      if (!started) {
+        drawMessage('Neon Dodge', 'Press Start Game');
+        return;
+      }
+      if (paused) {
+        drawMessage('Paused', 'Press Pause again to continue');
+      } else if (state.gameOver) {
+        drawMessage('Game Over', 'Press Restart to play again');
+      }
+    }
+
+    function drawMessage(title, sub) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(4,8,20,0.5)';
+      roundRect(ctx, W / 2 - 210, H / 2 - 90, 420, 180, 28);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 40px Inter, sans-serif';
+      ctx.fillText(title, W / 2, H / 2 - 10);
+      ctx.fillStyle = '#9bb0d1';
+      ctx.font = '600 18px Inter, sans-serif';
+      ctx.fillText(sub, W / 2, H / 2 + 28);
+      ctx.restore();
+    }
+
+    function drawFlash() {
+      if (state.flash <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = state.flash * 0.2;
+      ctx.fillStyle = '#ff6d87';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+
+    function render() {
+      ctx.clearRect(0, 0, W, H);
+
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#040814');
+      bg.addColorStop(1, '#0b1634');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      drawStars();
+      drawLanes();
+
+      for (const ob of state.obstacles) drawGlowRect(ob.x, ob.y, ob.w, ob.h, '#ff5a79', ob.glow);
+      for (const orb of state.orbs) drawOrb(orb);
+      drawParticles();
+      drawPlayer();
+      drawTopHud();
+      drawFlash();
+      drawCenterMessage();
+    }
+
+    function loop(ts) {
+      const dt = Math.min(0.033, (ts - lastTime) / 1000 || 0.016);
+      lastTime = ts;
+      update(dt);
+      render();
+      animationId = requestAnimationFrame(loop);
+    }
+
+    function roundRect(ctx2, x, y, w, h, r) {
+      const rr = Math.min(r, w / 2, h / 2);
+      ctx2.beginPath();
+      ctx2.moveTo(x + rr, y);
+      ctx2.arcTo(x + w, y, x + w, y + h, rr);
+      ctx2.arcTo(x + w, y + h, x, y + h, rr);
+      ctx2.arcTo(x, y + h, x, y, rr);
+      ctx2.arcTo(x, y, x + w, y, rr);
+      ctx2.closePath();
+    }
+
+    function handlePointer(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const x = (clientX - rect.left) * scaleX;
+      player.targetX = x - player.w / 2 - pointerOffset;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      pointerActive = true;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const x = (e.clientX - rect.left) * scaleX;
+      pointerOffset = x - centerX();
+      handlePointer(e.clientX);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (pointerActive) handlePointer(e.clientX);
+    });
+
+    window.addEventListener('mouseup', () => {
+      pointerActive = false;
+      pointerOffset = 0;
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      pointerActive = true;
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = W / rect.width;
+      const x = (touch.clientX - rect.left) * scaleX;
+      pointerOffset = x - centerX();
+      handlePointer(touch.clientX);
+    }, { passive: true });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!pointerActive) return;
+      handlePointer(e.touches[0].clientX);
+    }, { passive: true });
+
+    canvas.addEventListener('touchend', () => {
+      pointerActive = false;
+      pointerOffset = 0;
+    });
+
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'arrowleft' || key === 'a') keys.left = true;
+      if (key === 'arrowright' || key === 'd') keys.right = true;
+      if (key === 'p') togglePause();
+      if (key === ' ') {
+        e.preventDefault();
+        if (!started || state.gameOver) startGame();
+        else togglePause();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const key = e.key.toLowerCase();
+      if (key === 'arrowleft' || key === 'a') keys.left = false;
+      if (key === 'arrowright' || key === 'd') keys.right = false;
+    });
+
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', () => {
+      started = true;
+      resetGame();
+      statusText.textContent = 'เริ่มรอบใหม่แล้ว';
+    });
+    pauseBtn.addEventListener('click', togglePause);
+    difficultyEl.addEventListener('change', () => {
+      if (started) {
+        resetGame();
+        statusText.textContent = 'เปลี่ยนระดับแล้ว เริ่มใหม่อัตโนมัติ';
+      }
+    });
+
+    resetGame();
+    render();
+  </script>
+</body>
+</html>
