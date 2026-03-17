@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XO AI Battle</title>
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --bg2: #1e293b;
+      --panel: rgba(15, 23, 42, 0.72);
+      --panel-border: rgba(255, 255, 255, 0.12);
+      --text: #e5eefc;
+      --muted: #94a3b8;
+      --x: #38bdf8;
+      --o: #f472b6;
+      --accent: #a78bfa;
+      --win: #22c55e;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(244, 114, 182, 0.18), transparent 28%),
+        radial-gradient(circle at bottom, rgba(167, 139, 250, 0.16), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 320px;
+      height: 320px;
+      border-radius: 999px;
+      filter: blur(70px);
+      pointer-events: none;
+      opacity: 0.18;
+      z-index: 0;
+      animation: floatBlob 10s ease-in-out infinite;
+    }
+
+    body::before {
+      background: #38bdf8;
+      top: 5%;
+      left: 5%;
+    }
+
+    body::after {
+      background: #f472b6;
+      right: 5%;
+      bottom: 8%;
+      animation-delay: -4s;
+    }
+
+    @keyframes floatBlob {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-24px) scale(1.08); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(94vw, 980px);
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .game-panel {
+      padding: 28px;
+    }
+
+    .side-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.98rem;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .board-wrap {
+      display: grid;
+      place-items: center;
+      padding: 8px 0 4px;
+    }
+
+    .board {
+      width: min(76vw, 520px);
+      aspect-ratio: 1 / 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .cell {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 12px 26px rgba(0,0,0,0.18);
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+      overflow: hidden;
+    }
+
+    .cell:hover:not(.disabled):not(.filled) {
+      transform: translateY(-2px) scale(1.015);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 32px rgba(0,0,0,0.24);
+    }
+
+    .cell.disabled { cursor: default; }
+
+    .cell.win {
+      border-color: rgba(34, 197, 94, 0.7);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.45), 0 0 26px rgba(34, 197, 94, 0.26);
+      background: linear-gradient(180deg, rgba(34,197,94,0.22), rgba(255,255,255,0.05));
+    }
+
+    .symbol {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: clamp(3.2rem, 9vw, 5.8rem);
+      font-weight: 900;
+      user-select: none;
+      transform: scale(0.5);
+      opacity: 0;
+      animation: popIn 0.24s ease forwards;
+      text-shadow: 0 0 18px currentColor;
+    }
+
+    .symbol.x { color: var(--x); }
+    .symbol.o { color: var(--o); }
+
+    @keyframes popIn {
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .status-card,
+    .score-card,
+    .control-card {
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section-title {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      color: #dbeafe;
+      letter-spacing: 0.02em;
+    }
+
+    .status-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      line-height: 1.4;
+      min-height: 3em;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .score-box {
+      text-align: center;
+      padding: 14px 10px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .score-box .label {
+      font-size: 0.86rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .score-box .value {
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .value.x { color: var(--x); }
+    .value.o { color: var(--o); }
+    .value.draw { color: #fbbf24; }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+    }
+
+    button, select {
+      width: 100%;
+      border: 0;
+      outline: none;
+      border-radius: 16px;
+      font: inherit;
+    }
+
+    button {
+      padding: 14px 16px;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.14s ease, opacity 0.14s ease, box-shadow 0.14s ease;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.18);
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #6366f1);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #f472b6, #a855f7);
+    }
+
+    .btn-ghost {
+      background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .choice-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    select {
+      padding: 14px 16px;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .board {
+        width: min(88vw, 520px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel game-panel">
+      <div class="title">
+        <div>
+          <h1>XO AI Battle</h1>
+          <div class="subtitle">เกม XO แบบ HTML5 เล่นกับ AI ที่ค่อนข้างฉลาดและกราฟิกดูทันสมัย</div>
+        </div>
+        <div class="pill" id="turnBadge">Turn: Player</div>
+      </div>
+
+      <div class="board-wrap">
+        <div class="board" id="board"></div>
+      </div>
+    </section>
+
+    <aside class="panel side-panel">
+      <div class="status-card">
+        <h2 class="section-title">สถานะเกม</h2>
+        <div class="status-text" id="statusText">เริ่มเกมได้เลย คุณคือ X</div>
+        <div class="hint">กดช่องเพื่อวาง X และพยายามชนะ AI ให้ได้</div>
+      </div>
+
+      <div class="score-card">
+        <h2 class="section-title">คะแนนสะสม</h2>
+        <div class="score-grid">
+          <div class="score-box">
+            <div class="label">Player</div>
+            <div class="value x" id="playerScore">0</div>
+          </div>
+          <div class="score-box">
+            <div class="label">Draw</div>
+            <div class="value draw" id="drawScore">0</div>
+          </div>
+          <div class="score-box">
+            <div class="label">AI</div>
+            <div class="value o" id="aiScore">0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-card">
+        <h2 class="section-title">ตั้งค่า</h2>
+        <div class="controls">
+          <select id="difficulty">
+            <option value="easy">Easy AI</option>
+            <option value="normal" selected>Normal AI</option>
+            <option value="hard">Hard AI</option>
+          </select>
+
+          <div class="choice-row">
+            <button class="btn-primary" id="playX">เล่นเป็น X</button>
+            <button class="btn-secondary" id="playO">เล่นเป็น O</button>
+          </div>
+
+          <button class="btn-primary" id="newRoundBtn">เริ่มรอบใหม่</button>
+          <button class="btn-ghost" id="resetScoreBtn">รีเซ็ตคะแนน</button>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        AI ใช้ minimax ในโหมด Hard ทำให้เล่นพลาดยากมาก เหมาะเอาไปต่อยอดเป็นเกมเว็บหรืออัปโหลดขึ้น GitHub Pages ได้ทันที
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    const boardEl = document.getElementById('board');
+    const statusTextEl = document.getElementById('statusText');
+    const turnBadgeEl = document.getElementById('turnBadge');
+    const difficultyEl = document.getElementById('difficulty');
+    const playerScoreEl = document.getElementById('playerScore');
+    const drawScoreEl = document.getElementById('drawScore');
+    const aiScoreEl = document.getElementById('aiScore');
+    const newRoundBtn = document.getElementById('newRoundBtn');
+    const resetScoreBtn = document.getElementById('resetScoreBtn');
+    const playXBtn = document.getElementById('playX');
+    const playOBtn = document.getElementById('playO');
+
+    const WIN_LINES = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    let board = Array(9).fill('');
+    let playerSymbol = 'X';
+    let aiSymbol = 'O';
+    let currentTurn = 'X';
+    let gameOver = false;
+    let scores = { player: 0, draw: 0, ai: 0 };
+
+    function renderBoard(highlight = []) {
+      boardEl.innerHTML = '';
+      board.forEach((cell, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'cell';
+        if (cell) btn.classList.add('filled');
+        if (gameOver) btn.classList.add('disabled');
+        if (highlight.includes(index)) btn.classList.add('win');
+        btn.addEventListener('click', () => handleCellClick(index));
+
+        if (cell) {
+          const symbol = document.createElement('div');
+          symbol.className = `symbol ${cell.toLowerCase()}`;
+          symbol.textContent = cell;
+          btn.appendChild(symbol);
+        }
+
+        boardEl.appendChild(btn);
+      });
+    }
+
+    function updateScores() {
+      playerScoreEl.textContent = scores.player;
+      drawScoreEl.textContent = scores.draw;
+      aiScoreEl.textContent = scores.ai;
+    }
+
+    function setStatus(message) {
+      statusTextEl.textContent = message;
+    }
+
+    function updateTurnBadge() {
+      if (gameOver) {
+        turnBadgeEl.textContent = 'Round Finished';
+      } else {
+        turnBadgeEl.textContent = `Turn: ${currentTurn === playerSymbol ? 'Player' : 'AI'}`;
+      }
+    }
+
+    function getWinner(state) {
+      for (const line of WIN_LINES) {
+        const [a, b, c] = line;
+        if (state[a] && state[a] === state[b] && state[a] === state[c]) {
+          return { winner: state[a], line };
+        }
+      }
+      if (state.every(cell => cell)) {
+        return { winner: 'draw', line: [] };
+      }
+      return null;
+    }
+
+    function startRound() {
+      board = Array(9).fill('');
+      gameOver = false;
+      currentTurn = 'X';
+      renderBoard();
+      updateTurnBadge();
+
+      if (playerSymbol === 'X') {
+        setStatus('เริ่มเกมได้เลย คุณคือ X');
+      } else {
+        setStatus('AI เริ่มก่อน เพราะคุณเลือกเล่นเป็น O');
+        setTimeout(aiMove, 450);
+      }
+    }
+
+    function endRound(result) {
+      gameOver = true;
+      renderBoard(result.line || []);
+
+      if (result.winner === playerSymbol) {
+        scores.player += 1;
+        setStatus('คุณชนะรอบนี้!');
+      } else if (result.winner === aiSymbol) {
+        scores.ai += 1;
+        setStatus('AI ชนะรอบนี้');
+      } else {
+        scores.draw += 1;
+        setStatus('เสมอ! ไม่มีใครชนะ');
+      }
+
+      updateScores();
+      updateTurnBadge();
+    }
+
+    function handleCellClick(index) {
+      if (gameOver || currentTurn !== playerSymbol || board[index]) return;
+
+      board[index] = playerSymbol;
+      renderBoard();
+
+      const result = getWinner(board);
+      if (result) {
+        endRound(result);
+        return;
+      }
+
+      currentTurn = aiSymbol;
+      updateTurnBadge();
+      setStatus('AI กำลังคิด...');
+      setTimeout(aiMove, 350);
+    }
+
+    function aiMove() {
+      if (gameOver) return;
+
+      const difficulty = difficultyEl.value;
+      let move;
+
+      if (difficulty === 'easy') {
+        move = randomMove(board);
+      } else if (difficulty === 'normal') {
+        move = Math.random() < 0.35 ? randomMove(board) : bestMove(board, aiSymbol, playerSymbol);
+      } else {
+        move = bestMove(board, aiSymbol, playerSymbol);
+      }
+
+      if (move === undefined || move === null) return;
+
+      board[move] = aiSymbol;
+      renderBoard();
+
+      const result = getWinner(board);
+      if (result) {
+        endRound(result);
+        return;
+      }
+
+      currentTurn = playerSymbol;
+      updateTurnBadge();
+      setStatus('ตาคุณแล้ว');
+    }
+
+    function randomMove(state) {
+      const moves = state.map((v, i) => v ? null : i).filter(v => v !== null);
+      if (!moves.length) return null;
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    function bestMove(state, ai, human) {
+      let bestScore = -Infinity;
+      let move = null;
+
+      for (let i = 0; i < state.length; i++) {
+        if (state[i] !== '') continue;
+        state[i] = ai;
+        const score = minimax(state, 0, false, ai, human, -Infinity, Infinity);
+        state[i] = '';
+        if (score > bestScore) {
+          bestScore = score;
+          move = i;
+        }
+      }
+      return move;
+    }
+
+    function minimax(state, depth, isMaximizing, ai, human, alpha, beta) {
+      const result = getWinner(state);
+      if (result) {
+        if (result.winner === ai) return 10 - depth;
+        if (result.winner === human) return depth - 10;
+        return 0;
+      }
+
+      if (isMaximizing) {
+        let best = -Infinity;
+        for (let i = 0; i < state.length; i++) {
+          if (state[i] !== '') continue;
+          state[i] = ai;
+          const score = minimax(state, depth + 1, false, ai, human, alpha, beta);
+          state[i] = '';
+          best = Math.max(best, score);
+          alpha = Math.max(alpha, best);
+          if (beta <= alpha) break;
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i = 0; i < state.length; i++) {
+          if (state[i] !== '') continue;
+          state[i] = human;
+          const score = minimax(state, depth + 1, true, ai, human, alpha, beta);
+          state[i] = '';
+          best = Math.min(best, score);
+          beta = Math.min(beta, best);
+          if (beta <= alpha) break;
+        }
+        return best;
+      }
+    }
+
+    playXBtn.addEventListener('click', () => {
+      playerSymbol = 'X';
+      aiSymbol = 'O';
+      startRound();
+    });
+
+    playOBtn.addEventListener('click', () => {
+      playerSymbol = 'O';
+      aiSymbol = 'X';
+      startRound();
+    });
+
+    newRoundBtn.addEventListener('click', startRound);
+
+    resetScoreBtn.addEventListener('click', () => {
+      scores = { player: 0, draw: 0, ai: 0 };
+      updateScores();
+      startRound();
+    });
+
+    difficultyEl.addEventListener('change', () => {
+      startRound();
+    });
+
+    updateScores();
+    startRound();
+  </script>
+</body>
+</html>
