@@ -1,0 +1,20 @@
+Copyright © 2026 Treethawat Thanawachiramate
+
+All rights reserved.
+
+This project is provided for personal, family, and classroom use only.
+
+You may:
+- Play the games for free
+- Share the official website link
+- Use the games with children at home or in a classroom
+
+You may not:
+- Resell this project
+- Redistribute or republish this project
+- Claim this project as your own
+- Copy, modify, or re-upload the source code as your own project
+- Use this project or its source code for commercial purposes without written permission
+
+Official website:
+https://man2454.github.io/develop-kids/
