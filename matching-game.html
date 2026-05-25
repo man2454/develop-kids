@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เกมจับคู่ภาพ</title>
+  <style>
+    :root {
+      --bg1: #fff7ad;
+      --bg2: #ffd1e8;
+      --bg3: #b9f3ff;
+      --card: rgba(255, 255, 255, 0.93);
+      --text: #3d315b;
+      --purple: #6c63ff;
+      --green: #44c767;
+      --orange: #ff9f43;
+      --pink: #ff5c7a;
+      --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,255,255,.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 90% 10%, rgba(255,255,255,.75) 0 6%, transparent 7%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, 96vw);
+      margin: 0 auto;
+      padding: 24px 0 34px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .title-area h1 {
+      margin: 0 0 6px;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height: 1.05;
+      color: #5b4bdb;
+      text-shadow: 2px 2px 0 #fff;
+    }
+
+    .title-area p {
+      margin: 0;
+      font-size: clamp(16px, 2vw, 22px);
+      color: #6d5f8f;
+      font-weight: 800;
+    }
+
+    .mascot {
+      min-width: 110px;
+      height: 110px;
+      display: grid;
+      place-items: center;
+      font-size: 66px;
+      background: linear-gradient(160deg, #ffffff, #e8fbff);
+      border-radius: 32px;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.04);
+      transform: rotate(4deg);
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .mode-btn,
+    .action-btn,
+    .card {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform .12s ease, filter .12s ease;
+    }
+
+    .mode-btn:hover,
+    .action-btn:hover,
+    .card:hover {
+      transform: translateY(-3px) scale(1.02);
+      filter: brightness(1.03);
+    }
+
+    .mode-btn:active,
+    .action-btn:active,
+    .card:active {
+      transform: translateY(1px) scale(.98);
+    }
+
+    .mode-btn {
+      min-height: 92px;
+      padding: 12px 8px;
+      border-radius: 24px;
+      color: white;
+      font-size: 19px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.12), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .mode-btn .icon {
+      display: block;
+      font-size: 34px;
+      margin-bottom: 4px;
+    }
+
+    .mode-btn.active {
+      outline: 6px solid #fff;
+      transform: scale(1.04);
+    }
+
+    .mode-animal { background: linear-gradient(135deg, #2fcf6f, #00c2a8); }
+    .mode-fruit { background: linear-gradient(135deg, #ff9671, #ffc75f); }
+    .mode-mix { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .mode-hard { background: linear-gradient(135deg, #ff5c7a, #d65db1); }
+
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      height: 100%;
+    }
+
+    .score-item {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fff, #f8fbff);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.05);
+    }
+
+    .score-item strong {
+      display: block;
+      font-size: clamp(28px, 3.4vw, 42px);
+      color: #5b4bdb;
+      line-height: 1;
+    }
+
+    .score-item span {
+      font-size: 15px;
+      color: #7b6c99;
+      font-weight: 900;
+    }
+
+    .question-panel {
+      display: grid;
+      gap: 16px;
+    }
+
+    .instruction {
+      text-align: center;
+      padding: 18px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #ffffff, #fff6fb);
+      border: 3px dashed rgba(108, 99, 255, .35);
+      font-size: clamp(24px, 3.5vw, 42px);
+      font-weight: 900;
+      color: #3d315b;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(120px, 1fr));
+      gap: 18px;
+      padding: 4px;
+    }
+
+    .card {
+      position: relative;
+      min-height: 150px;
+      border-radius: 30px;
+      background: transparent;
+      perspective: 900px;
+    }
+
+    .card-inner {
+      position: absolute;
+      inset: 0;
+      border-radius: 30px;
+      transition: transform .35s ease;
+      transform-style: preserve-3d;
+      box-shadow: var(--shadow);
+    }
+
+    .card.flipped .card-inner,
+    .card.matched .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 30px;
+      backface-visibility: hidden;
+      border: 6px solid #fff;
+      overflow: hidden;
+    }
+
+    .card-front {
+      background: linear-gradient(135deg, #6c63ff, #a66cff);
+      color: white;
+      font-size: clamp(54px, 7vw, 86px);
+      box-shadow: inset 0 -12px 0 rgba(0,0,0,.13);
+    }
+
+    .card-back {
+      background: linear-gradient(180deg, #ffffff, #f5f0ff);
+      transform: rotateY(180deg);
+      font-size: clamp(64px, 8vw, 104px);
+      box-shadow: inset 0 -12px 0 rgba(0,0,0,.06);
+    }
+
+    .card.matched .card-face {
+      border-color: #49d86b;
+    }
+
+    .card.matched {
+      pointer-events: none;
+      animation: matchedPop .5s ease;
+    }
+
+    @keyframes matchedPop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.07) rotate(1deg); }
+      100% { transform: scale(1); }
+    }
+
+    .bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .feedback {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 24px;
+      background: #ffffff;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 900;
+      color: #5b4bdb;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.04);
+    }
+
+    .action-btn {
+      min-width: 160px;
+      min-height: 72px;
+      border-radius: 24px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.14), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .listen-btn { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .reset-btn { background: linear-gradient(135deg, #ff8a3d, #ff5c7a); }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 34px;
+      animation: fly 900ms ease-out forwards;
+    }
+
+    @keyframes fly {
+      0% { transform: translateY(0) scale(.4) rotate(0); opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.4) rotate(180deg); opacity: 0; }
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 15px;
+      color: rgba(61, 49, 91, .72);
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      header, .top-row, .bottom-bar {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        text-align: center;
+        justify-items: center;
+      }
+
+      .mode-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .score-box {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .board {
+        grid-template-columns: repeat(3, minmax(90px, 1fr));
+      }
+
+      .card {
+        min-height: 120px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <main class="app">
+    <header>
+      <div class="title-area">
+        <h1>เกมจับคู่ภาพ</h1>
+        <p>คลิกเปิดการ์ด 2 ใบ ถ้าภาพเหมือนกันถือว่าจับคู่สำเร็จ</p>
+      </div>
+      <div class="mascot" aria-hidden="true">🧠</div>
+    </header>
+
+    <section class="top-row">
+      <div class="panel">
+        <div class="mode-grid" id="modeGrid"></div>
+      </div>
+
+      <div class="panel score-box">
+        <div class="score-item"><div><strong id="pairsText">0/4</strong><span>คู่ที่เจอ</span></div></div>
+        <div class="score-item"><div><strong id="movesText">0</strong><span>จำนวนคลิกคู่</span></div></div>
+        <div class="score-item"><div><strong id="bestText">-</strong><span>ดีที่สุด</span></div></div>
+        <div class="score-item"><div><strong id="levelText">ง่าย</strong><span>ระดับ</span></div></div>
+      </div>
+    </section>
+
+    <section class="panel question-panel">
+      <div class="instruction" id="instruction">จับคู่ภาพที่เหมือนกัน</div>
+      <div class="board" id="board"></div>
+    </section>
+
+    <section class="bottom-bar">
+      <div class="feedback" id="feedback">พร้อมแล้ว มาเริ่มจับคู่กันเลย</div>
+      <button class="action-btn listen-btn" id="listenBtn">ฟังคำสั่ง</button>
+      <button class="action-btn reset-btn" id="resetBtn">เริ่มใหม่</button>
+    </section>
+
+    <div class="footer-note">เหมาะสำหรับเด็กอนุบาล ใช้ฝึกคลิกเม้าส์ สมาธิ และความจำระยะสั้น</div>
+  </main>
+
+  <script>
+    const PAIRS_PER_ROUND = 4;
+
+    const modes = [
+      {
+        id: "animal",
+        name: "สัตว์",
+        icon: "🐶",
+        className: "mode-animal",
+        level: "ง่าย",
+        instruction: "จับคู่สัตว์ที่เหมือนกัน",
+        speak: "จับคู่สัตว์ที่เหมือนกัน",
+        items: ["🐶", "🐱", "🐭", "🐰", "🐻", "🐼", "🦁", "🐯", "🐮", "🐷", "🐸", "🐵", "🐔", "🐦", "🦆", "🦉", "🐘", "🐴", "🐟", "🐢", "🐍", "🐝", "🦋"]
+      },
+      {
+        id: "fruit",
+        name: "ผลไม้",
+        icon: "🍎",
+        className: "mode-fruit",
+        level: "ง่าย",
+        instruction: "จับคู่ผลไม้ที่เหมือนกัน",
+        speak: "จับคู่ผลไม้ที่เหมือนกัน",
+        items: ["🍎", "🍌", "🍇", "🍓", "🍒", "🍉", "🍊", "🍋", "🍍", "🥝", "🍑", "🥭", "🍐", "🥥"]
+      },
+      {
+        id: "mix",
+        name: "รวมภาพ",
+        icon: "🎲",
+        className: "mode-mix",
+        level: "กลาง",
+        instruction: "จับคู่ภาพที่เหมือนกัน",
+        speak: "จับคู่ภาพที่เหมือนกัน",
+        items: ["🐶", "🐱", "🐰", "🐼", "🍎", "🍌", "🍓", "🍉", "🚗", "✈️", "⚽", "🎈", "⭐", "🌙", "☀️", "🌈", "🧁", "🎁"]
+      },
+      {
+        id: "hard",
+        name: "ท้าทาย",
+        icon: "🌟",
+        className: "mode-hard",
+        level: "ยาก",
+        instruction: "ตั้งใจดู แล้วจับคู่ภาพที่เหมือนกัน",
+        speak: "ตั้งใจดู แล้วจับคู่ภาพที่เหมือนกัน",
+        items: ["🐶", "🐱", "🐭", "🐰", "🐻", "🐼", "🦁", "🐯", "🐮", "🐷", "🐸", "🐵", "🍎", "🍌", "🍇", "🍓", "🍒", "🍉", "🚗", "🚕", "🚙", "🚌"]
+      }
+    ];
+
+    const state = {
+      modeId: "animal",
+      cards: [],
+      firstCard: null,
+      secondCard: null,
+      locked: false,
+      matchedPairs: 0,
+      moves: 0,
+      bestByMode: {}
+    };
+
+    const modeGrid = document.getElementById("modeGrid");
+    const board = document.getElementById("board");
+    const instruction = document.getElementById("instruction");
+    const feedback = document.getElementById("feedback");
+    const pairsText = document.getElementById("pairsText");
+    const movesText = document.getElementById("movesText");
+    const bestText = document.getElementById("bestText");
+    const levelText = document.getElementById("levelText");
+    const listenBtn = document.getElementById("listenBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stars = document.getElementById("stars");
+
+    function getCurrentMode() {
+      return modes.find(mode => mode.id === state.modeId) || modes[0];
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function pickMany(array, count) {
+      return shuffle(array).slice(0, count);
+    }
+
+    function renderModes() {
+      modeGrid.innerHTML = "";
+      modes.forEach(mode => {
+        const btn = document.createElement("button");
+        btn.className = `mode-btn ${mode.className} ${mode.id === state.modeId ? "active" : ""}`;
+        btn.innerHTML = `<span class="icon">${mode.icon}</span>${mode.name}`;
+        btn.addEventListener("click", () => {
+          state.modeId = mode.id;
+          renderModes();
+          startNewGame();
+        });
+        modeGrid.appendChild(btn);
+      });
+    }
+
+    function createDeck() {
+      const mode = getCurrentMode();
+      const selectedItems = pickMany(mode.items, PAIRS_PER_ROUND);
+      const deck = [];
+
+      selectedItems.forEach((item, index) => {
+        deck.push({ id: `${index}-a`, pairId: index, icon: item, matched: false });
+        deck.push({ id: `${index}-b`, pairId: index, icon: item, matched: false });
+      });
+
+      return shuffle(deck);
+    }
+
+    function startNewGame() {
+      stopSpeaking();
+      const mode = getCurrentMode();
+
+      state.cards = createDeck();
+      state.firstCard = null;
+      state.secondCard = null;
+      state.locked = false;
+      state.matchedPairs = 0;
+      state.moves = 0;
+
+      instruction.textContent = mode.instruction;
+      feedback.textContent = "เปิดการ์ด 2 ใบ เพื่อหาภาพที่เหมือนกัน";
+
+      renderBoard();
+      updateScore();
+      setTimeout(() => speakText(mode.speak), 450);
+    }
+
+    function renderBoard() {
+      board.innerHTML = "";
+      state.cards.forEach((cardData, index) => {
+        const card = document.createElement("button");
+        card.className = "card";
+        card.dataset.index = index;
+        card.innerHTML = `
+          <div class="card-inner">
+            <div class="card-face card-front">?</div>
+            <div class="card-face card-back">${cardData.icon}</div>
+          </div>
+        `;
+        card.addEventListener("click", event => handleCardClick(index, card, event));
+        board.appendChild(card);
+      });
+    }
+
+    function handleCardClick(index, cardElement, event) {
+      if (state.locked) return;
+      const cardData = state.cards[index];
+      if (cardData.matched) return;
+      if (cardElement.classList.contains("flipped")) return;
+
+      cardElement.classList.add("flipped");
+
+      if (!state.firstCard) {
+        state.firstCard = { index, element: cardElement };
+        feedback.textContent = "เลือกอีกใบที่เหมือนกัน";
+        return;
+      }
+
+      state.secondCard = { index, element: cardElement };
+      state.moves += 1;
+      state.locked = true;
+      updateScore();
+
+      const firstData = state.cards[state.firstCard.index];
+      const secondData = state.cards[state.secondCard.index];
+
+      if (firstData.pairId === secondData.pairId) {
+        handleMatch(event);
+      } else {
+        handleMismatch();
+      }
+    }
+
+    function handleMatch(event) {
+      const first = state.firstCard;
+      const second = state.secondCard;
+
+      state.cards[first.index].matched = true;
+      state.cards[second.index].matched = true;
+
+      first.element.classList.add("matched");
+      second.element.classList.add("matched");
+
+      state.matchedPairs += 1;
+      feedback.textContent = "ถูกต้อง เจอคู่แล้ว";
+      playGoodSound();
+      createStars(event.clientX, event.clientY);
+      updateScore();
+
+      state.firstCard = null;
+      state.secondCard = null;
+      state.locked = false;
+
+      if (state.matchedPairs === PAIRS_PER_ROUND) {
+        finishGame();
+      }
+    }
+
+    function handleMismatch() {
+      feedback.textContent = "ยังไม่ใช่คู่นี้ ลองจำภาพไว้นะ";
+      playTrySound();
+
+      setTimeout(() => {
+        state.firstCard.element.classList.remove("flipped");
+        state.secondCard.element.classList.remove("flipped");
+        state.firstCard = null;
+        state.secondCard = null;
+        state.locked = false;
+        feedback.textContent = "ลองหาคู่อื่นต่อเลย";
+      }, 900);
+    }
+
+    function finishGame() {
+      const mode = getCurrentMode();
+      const oldBest = state.bestByMode[mode.id];
+      const isNewBest = !oldBest || state.moves < oldBest;
+
+      if (isNewBest) {
+        state.bestByMode[mode.id] = state.moves;
+      }
+
+      updateScore();
+      feedback.textContent = isNewBest
+        ? `จบแล้ว เก่งมาก ทำสถิติใหม่ ${state.moves} ครั้ง`
+        : `จบแล้ว เก่งมาก ใช้ ${state.moves} ครั้ง`;
+
+      speakText("จบแล้ว เก่งมาก คลิกเริ่มใหม่เพื่อเล่นอีกครั้ง");
+    }
+
+    function updateScore() {
+      const mode = getCurrentMode();
+      pairsText.textContent = `${state.matchedPairs}/${PAIRS_PER_ROUND}`;
+      movesText.textContent = state.moves;
+      bestText.textContent = state.bestByMode[mode.id] || "-";
+      levelText.textContent = mode.level;
+    }
+
+    function stopSpeaking() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakText(text) {
+      if (!("speechSynthesis" in window)) {
+        feedback.textContent = "เบราว์เซอร์นี้ยังไม่รองรับเสียงอ่าน";
+        return;
+      }
+
+      stopSpeaking();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "th-TH";
+      utterance.rate = 0.68;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
+
+      const voices = window.speechSynthesis.getVoices();
+      const thaiVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+      if (thaiVoice) utterance.voice = thaiVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function createStars(x, y) {
+      for (let i = 0; i < 10; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = ["⭐", "✨", "🌟", "💛"][Math.floor(Math.random() * 4)];
+        star.style.left = `${x + Math.floor(Math.random() * 160 - 80)}px`;
+        star.style.top = `${y + Math.floor(Math.random() * 60 - 30)}px`;
+        star.style.animationDelay = `${i * 35}ms`;
+        stars.appendChild(star);
+        setTimeout(() => star.remove(), 1200);
+      }
+    }
+
+    function playTone(freq, duration, type = "sine") {
+      try {
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + duration);
+      } catch (error) {}
+    }
+
+    function playGoodSound() {
+      playTone(660, .12, "triangle");
+      setTimeout(() => playTone(880, .16, "triangle"), 120);
+    }
+
+    function playTrySound() {
+      playTone(240, .16, "sine");
+    }
+
+    listenBtn.addEventListener("click", () => {
+      const mode = getCurrentMode();
+      speakText(mode.speak);
+    });
+
+    resetBtn.addEventListener("click", startNewGame);
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    renderModes();
+    startNewGame();
+  </script>
+</body>
+</html>
