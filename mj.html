@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -8,9 +9,9 @@
       --bg1: #fff7ad;
       --bg2: #ffd1e8;
       --bg3: #b9f3ff;
-      --card: rgba(255, 255, 255, 0.93);
+      --card: rgba(255,255,255,.93);
       --text: #3d315b;
-      --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
+      --shadow: 0 16px 35px rgba(68,52,126,.18);
     }
 
     * { box-sizing: border-box; user-select: none; }
@@ -27,11 +28,7 @@
       overflow-x: hidden;
     }
 
-    .app {
-      width: min(1180px, 96vw);
-      margin: 0 auto;
-      padding: 24px 0 34px;
-    }
+    .app { width: min(1180px, 96vw); margin: 0 auto; padding: 24px 0 34px; }
 
     header {
       display: flex;
@@ -54,11 +51,7 @@
       text-shadow: 2px 2px 0 #fff;
     }
 
-    .title-area p {
-      margin: 0;
-      font-size: clamp(16px, 2vw, 22px);
-      color: #6d5f8f;
-    }
+    .title-area p { margin: 0; font-size: clamp(16px, 2vw, 22px); color: #6d5f8f; }
 
     .mascot {
       min-width: 110px;
@@ -66,18 +59,13 @@
       display: grid;
       place-items: center;
       font-size: 66px;
-      background: linear-gradient(160deg, #ffffff, #e8fbff);
+      background: linear-gradient(160deg, #fff, #e8fbff);
       border-radius: 32px;
       box-shadow: inset 0 -8px 0 rgba(0,0,0,.04);
       transform: rotate(4deg);
     }
 
-    .top-row {
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-      margin-bottom: 18px;
-    }
+    .top-row { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; margin-bottom: 18px; }
 
     .panel {
       background: var(--card);
@@ -87,31 +75,21 @@
       box-shadow: var(--shadow);
     }
 
-    .category-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-    }
+    .category-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 
-    .category-btn,
-    .action-btn,
-    .choice-card {
+    .category-btn, .action-btn, .choice-card {
       border: 0;
       cursor: pointer;
       font-family: inherit;
       transition: transform .12s ease, filter .12s ease;
     }
 
-    .category-btn:hover,
-    .action-btn:hover,
-    .choice-card:hover {
+    .category-btn:hover, .action-btn:hover, .choice-card:hover {
       transform: translateY(-3px) scale(1.02);
       filter: brightness(1.03);
     }
 
-    .category-btn:active,
-    .action-btn:active,
-    .choice-card:active {
+    .category-btn:active, .action-btn:active, .choice-card:active {
       transform: translateY(1px) scale(.98);
     }
 
@@ -125,16 +103,8 @@
       box-shadow: inset 0 -7px 0 rgba(0,0,0,.12), 0 8px 18px rgba(0,0,0,.12);
     }
 
-    .category-btn .icon {
-      display: block;
-      font-size: 34px;
-      margin-bottom: 4px;
-    }
-
-    .category-btn.active {
-      outline: 6px solid #fff;
-      transform: scale(1.04);
-    }
+    .category-btn .icon { display: block; font-size: 34px; margin-bottom: 4px; }
+    .category-btn.active { outline: 6px solid #fff; transform: scale(1.04); }
 
     .cat-all { background: linear-gradient(135deg, #6c63ff, #a66cff); }
     .cat-time { background: linear-gradient(135deg, #ffb347, #ffcc33); }
@@ -147,12 +117,7 @@
     .cat-number { background: linear-gradient(135deg, #ff6f91, #ffc75f); }
     .cat-animal { background: linear-gradient(135deg, #2fcf6f, #00c2a8); }
 
-    .score-box {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      height: 100%;
-    }
+    .score-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; height: 100%; }
 
     .score-item {
       display: grid;
@@ -164,39 +129,20 @@
       box-shadow: inset 0 -5px 0 rgba(0,0,0,.05);
     }
 
-    .score-item strong {
-      display: block;
-      font-size: clamp(28px, 3.4vw, 42px);
-      color: #5b4bdb;
-      line-height: 1;
-    }
+    .score-item strong { display: block; font-size: clamp(28px, 3.4vw, 42px); color: #5b4bdb; line-height: 1; }
+    .score-item span { font-size: 16px; color: #7b6c99; font-weight: 900; }
 
-    .score-item span {
-      font-size: 16px;
-      color: #7b6c99;
-      font-weight: 900;
-    }
-
-    .game-panel {
-      min-height: 540px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 16px;
-    }
+    .game-panel { min-height: 540px; display: grid; grid-template-rows: auto 1fr auto; gap: 16px; }
 
     .question-box {
       text-align: center;
       padding: 20px 16px;
       border-radius: 26px;
-      background: linear-gradient(180deg, #ffffff, #fff6fb);
-      border: 3px dashed rgba(108, 99, 255, .35);
+      background: linear-gradient(180deg, #fff, #fff6fb);
+      border: 3px dashed rgba(108,99,255,.35);
     }
 
-    .question-label {
-      font-size: 18px;
-      color: #8a7aa8;
-      font-weight: 900;
-    }
+    .question-label { font-size: 18px; color: #8a7aa8; font-weight: 900; }
 
     .question {
       margin: 8px 0 0;
@@ -206,12 +152,7 @@
       line-height: 1.12;
     }
 
-    .choices {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(260px, 1fr));
-      gap: 22px;
-      align-items: stretch;
-    }
+    .choices { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 22px; align-items: stretch; }
 
     .choice-card {
       position: relative;
@@ -239,21 +180,8 @@
       box-shadow: inset 0 -5px 0 rgba(0,0,0,.12);
     }
 
-    .choice-visual {
-      display: grid;
-      place-items: center;
-      padding: 12px;
-      font-size: clamp(80px, 11vw, 150px);
-      line-height: 1;
-    }
-
-    .choice-note {
-      min-height: 34px;
-      font-size: clamp(18px, 2.2vw, 26px);
-      font-weight: 900;
-      text-align: center;
-      color: #61517d;
-    }
+    .choice-visual { display: grid; place-items: center; padding: 12px; font-size: clamp(80px, 11vw, 150px); line-height: 1; }
+    .choice-note { min-height: 34px; font-size: clamp(18px, 2.2vw, 26px); font-weight: 900; text-align: center; color: #61517d; }
 
     .choice-card.correct { animation: correctPop .48s ease; border-color: #49d86b; }
     .choice-card.wrong { animation: wrongShake .38s ease; border-color: #ff5c7a; }
@@ -271,12 +199,7 @@
       75% { transform: translateX(-7px); }
     }
 
-    .bottom-bar {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      gap: 12px;
-      align-items: center;
-    }
+    .bottom-bar { display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: center; }
 
     .feedback {
       min-height: 72px;
@@ -286,7 +209,7 @@
       text-align: center;
       padding: 12px 16px;
       border-radius: 24px;
-      background: #ffffff;
+      background: #fff;
       font-size: clamp(22px, 3vw, 36px);
       font-weight: 900;
       color: #5b4bdb;
@@ -307,24 +230,11 @@
     .next-btn { background: linear-gradient(135deg, #44c767, #2fb344); }
     .reset-btn { background: linear-gradient(135deg, #ff8a3d, #ff5c7a); }
 
-    .big-line, .short-line {
-      height: 22px;
-      border-radius: 999px;
-      background: currentColor;
-    }
-
+    .big-line, .short-line { height: 22px; border-radius: 999px; background: currentColor; }
     .big-line { width: 82%; }
     .short-line { width: 42%; }
 
-    .items-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-content: center;
-      gap: 14px;
-      max-width: 420px;
-      margin: 0 auto;
-    }
+    .items-row { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 14px; max-width: 420px; margin: 0 auto; }
 
     .mini-item {
       width: 58px;
@@ -351,7 +261,7 @@
       place-items: center;
       border-radius: 38px;
       background: linear-gradient(180deg, #fff, #f5f0ff);
-      border: 8px solid rgba(108, 99, 255, .2);
+      border: 8px solid rgba(108,99,255,.2);
       font-size: clamp(96px, 13vw, 170px);
       font-weight: 900;
       color: #5b4bdb;
@@ -370,6 +280,7 @@
     .rectangle { width: min(260px, 85%); height: 140px; border-radius: 24px; }
     .oval { width: min(240px, 82%); height: 140px; border-radius: 50%; }
     .diamond { transform: rotate(45deg); border-radius: 18px; }
+
     .heart {
       position: relative;
       width: 150px;
@@ -377,8 +288,8 @@
       background: transparent;
       box-shadow: none;
     }
-    .heart::before,
-    .heart::after {
+
+    .heart::before, .heart::after {
       content: "";
       position: absolute;
       width: 78px;
@@ -388,28 +299,24 @@
       top: 0;
       box-shadow: inset 0 -10px 0 rgba(0,0,0,.10);
     }
-    .heart::before {
-      left: 75px;
-      transform: rotate(-45deg);
-      transform-origin: 0 100%;
-    }
-    .heart::after {
-      left: 0;
-      transform: rotate(45deg);
-      transform-origin: 100% 100%;
-    }
+
+    .heart::before { left: 75px; transform: rotate(-45deg); transform-origin: 0 100%; }
+    .heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+
     .star-shape {
       width: 180px;
       height: 180px;
       background: #ffc94a;
       clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 70%, 21% 92%, 32% 57%, 2% 35%, 39% 35%);
     }
+
     .cross-shape {
       width: 180px;
       height: 180px;
       background: #845ec2;
       clip-path: polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%);
     }
+
     .triangle {
       width: 0;
       height: 0;
@@ -426,32 +333,15 @@
     .night-bg .choice-title { background: #5144c4; }
     .night-bg .choice-note { color: white; }
 
-    .stars {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: 10;
-    }
-
-    .star {
-      position: absolute;
-      font-size: 34px;
-      animation: fly 900ms ease-out forwards;
-    }
+    .stars { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+    .star { position: absolute; font-size: 34px; animation: fly 900ms ease-out forwards; }
 
     @keyframes fly {
       0% { transform: translateY(0) scale(.4) rotate(0); opacity: 1; }
       100% { transform: translateY(-130px) scale(1.4) rotate(180deg); opacity: 0; }
     }
 
-    .footer-note {
-      margin-top: 14px;
-      text-align: center;
-      font-size: 15px;
-      color: rgba(61, 49, 91, .72);
-      font-weight: 800;
-    }
+    .footer-note { margin-top: 14px; text-align: center; font-size: 15px; color: rgba(61,49,91,.72); font-weight: 800; }
 
     @media (max-width: 900px) {
       header, .top-row, .bottom-bar { grid-template-columns: 1fr; }
@@ -614,15 +504,15 @@
     ];
 
     const shapeList = [
-      { name: "วงกลม", answer: "circle", speak: "วงกลม", html: `<div class="shape circle" style="background:#ff5c7a"></div>` },
-      { name: "สี่เหลี่ยม", answer: "square", speak: "สี่เหลี่ยม", html: `<div class="shape square" style="background:#4db7ff"></div>` },
-      { name: "สามเหลี่ยม", answer: "triangle", speak: "สามเหลี่ยม", html: `<div class="shape triangle"></div>` },
-      { name: "วงรี", answer: "oval", speak: "วงรี", html: `<div class="shape oval" style="background:#44c767"></div>` },
-      { name: "ดาว", answer: "star", speak: "รูปดาว", html: `<div class="shape star-shape"></div>` },
-      { name: "หัวใจ", answer: "heart", speak: "รูปหัวใจ", html: `<div class="shape heart"></div>` },
-      { name: "เพชร", answer: "diamond", speak: "รูปเพชร", html: `<div class="shape diamond" style="background:#00b8a9"></div>` },
-      { name: "สี่เหลี่ยมผืนผ้า", answer: "rectangle", speak: "สี่เหลี่ยมผืนผ้า", html: `<div class="shape rectangle" style="background:#ff9f43"></div>` },
-      { name: "กากบาท", answer: "cross", speak: "รูปกากบาท", html: `<div class="shape cross-shape"></div>` }
+      { name: "วงกลม", answer: "circle", speak: "วงกลม", html: '<div class="shape circle" style="background:#ff5c7a"></div>' },
+      { name: "สี่เหลี่ยม", answer: "square", speak: "สี่เหลี่ยม", html: '<div class="shape square" style="background:#4db7ff"></div>' },
+      { name: "สามเหลี่ยม", answer: "triangle", speak: "สามเหลี่ยม", html: '<div class="shape triangle"></div>' },
+      { name: "วงรี", answer: "oval", speak: "วงรี", html: '<div class="shape oval" style="background:#44c767"></div>' },
+      { name: "ดาว", answer: "star", speak: "รูปดาว", html: '<div class="shape star-shape"></div>' },
+      { name: "หัวใจ", answer: "heart", speak: "รูปหัวใจ", html: '<div class="shape heart"></div>' },
+      { name: "เพชร", answer: "diamond", speak: "รูปเพชร", html: '<div class="shape diamond" style="background:#00b8a9"></div>' },
+      { name: "สี่เหลี่ยมผืนผ้า", answer: "rectangle", speak: "สี่เหลี่ยมผืนผ้า", html: '<div class="shape rectangle" style="background:#ff9f43"></div>' },
+      { name: "กากบาท", answer: "cross", speak: "รูปกากบาท", html: '<div class="shape cross-shape"></div>' }
     ];
 
     const itemList = ["🍎", "⭐", "🐟", "🚗", "🌸", "🧁", "🍌", "⚽", "🐻", "🎈"];
@@ -671,21 +561,25 @@
 
     function renderCategories() {
       categoryGrid.innerHTML = "";
+
       categoryList.forEach(cat => {
         const btn = document.createElement("button");
-        btn.className = `category-btn ${cat.className} ${state.category === cat.id ? "active" : ""}`;
-        btn.innerHTML = `<span class="icon">${cat.icon}</span>${cat.name}`;
-        btn.onclick = () => {
+        btn.className = "category-btn " + cat.className + (state.category === cat.id ? " active" : "");
+        btn.innerHTML = '<span class="icon">' + cat.icon + '</span>' + cat.name;
+        btn.addEventListener("click", () => {
           state.category = cat.id;
+          state.score = 0;
+          state.total = 0;
+          state.streak = 0;
           renderCategories();
           startNewRound();
-        };
+        });
         categoryGrid.appendChild(btn);
       });
     }
 
     function updateScore() {
-      roundNoEl.textContent = `${Math.min(state.roundIndex + 1, ROUND_SIZE)}/${ROUND_SIZE}`;
+      roundNoEl.textContent = Math.min(state.roundIndex + 1, ROUND_SIZE) + "/" + ROUND_SIZE;
       scoreEl.textContent = state.score;
       totalEl.textContent = state.total;
       streakEl.textContent = state.streak;
@@ -693,19 +587,18 @@
 
     function setModeLabel() {
       const cat = categoryList.find(c => c.id === state.category);
-      modeLabel.textContent = `หมวด${cat ? cat.name : "รวม"}`;
+      modeLabel.textContent = "หมวด" + (cat ? cat.name : "รวม");
     }
 
     function choiceTemplate(choice, index) {
       const card = document.createElement("button");
-      card.className = `choice-card ${choice.cardClass || ""}`;
+      card.className = "choice-card " + (choice.cardClass || "");
       card.dataset.answer = choice.answer;
-      card.innerHTML = `
-        <div class="choice-title" style="background:${choice.titleColor || "#6c63ff"}">${index === 0 ? "ฝั่งซ้าย" : "ฝั่งขวา"}</div>
-        <div class="choice-visual">${choice.visual}</div>
-        <div class="choice-note">${choice.note || ""}</div>
-      `;
-      card.onclick = (event) => checkAnswer(choice.answer, card, event);
+      card.innerHTML =
+        '<div class="choice-title" style="background:' + (choice.titleColor || "#6c63ff") + '">' + (index === 0 ? "ฝั่งซ้าย" : "ฝั่งขวา") + '</div>' +
+        '<div class="choice-visual">' + choice.visual + '</div>' +
+        '<div class="choice-note">' + (choice.note || "") + '</div>';
+      card.addEventListener("click", event => checkAnswer(choice.answer, card, event));
       return card;
     }
 
@@ -738,43 +631,46 @@
         card.classList.add("wrong");
         feedback.textContent = "ยังไม่ใช่นะ ข้อถัดไปเอาใหม่นะ";
         playTrySound();
-        [...choices.children].forEach(child => {
+        Array.from(choices.children).forEach(child => {
           if (child.dataset.answer === state.currentAnswer) child.classList.add("correct");
         });
       }
 
       updateScore();
-      setTimeout(goNextQuestion, 900);
+      setTimeout(advanceQuestion, 900);
     }
 
     function renderRoundComplete() {
       stopSpeaking();
       state.locked = true;
       questionText.textContent = "จบชุดแล้ว เก่งมาก";
-      choices.innerHTML = `
-        <button class="choice-card" onclick="startNewRound()">
-          <div class="choice-title" style="background:#44c767">เล่นชุดใหม่</div>
-          <div class="choice-visual">🎉</div>
-          <div class="choice-note">คลิกเพื่อสุ่มโจทย์ใหม่ 7 ข้อ</div>
-        </button>
-        <button class="choice-card" onclick="resetAll()">
-          <div class="choice-title" style="background:#ff8a3d">ล้างคะแนน</div>
-          <div class="choice-visual">🔄</div>
-          <div class="choice-note">เริ่มนับคะแนนใหม่</div>
-        </button>
-      `;
-      feedback.textContent = `ชุดนี้ทำได้ ${state.score} คะแนน จาก ${state.total} ครั้ง`;
-      roundNoEl.textContent = `${ROUND_SIZE}/${ROUND_SIZE}`;
+      choices.innerHTML =
+        '<button class="choice-card" id="playAgainBtn">' +
+          '<div class="choice-title" style="background:#44c767">เล่นชุดใหม่</div>' +
+          '<div class="choice-visual">🎉</div>' +
+          '<div class="choice-note">คลิกเพื่อสุ่มโจทย์ใหม่ 7 ข้อ</div>' +
+        '</button>' +
+        '<button class="choice-card" id="clearScoreBtn">' +
+          '<div class="choice-title" style="background:#ff8a3d">ล้างคะแนน</div>' +
+          '<div class="choice-visual">🔄</div>' +
+          '<div class="choice-note">เริ่มนับคะแนนใหม่</div>' +
+        '</button>';
+
+      document.getElementById("playAgainBtn").addEventListener("click", startNewRound);
+      document.getElementById("clearScoreBtn").addEventListener("click", resetAll);
+      feedback.textContent = "ชุดนี้ทำได้ " + state.score + " คะแนน จาก " + state.total + " ครั้ง";
+      roundNoEl.textContent = ROUND_SIZE + "/" + ROUND_SIZE;
       setTimeout(() => speakText("จบชุดแล้ว เก่งมาก คลิกเล่นชุดใหม่ได้เลย"), 450);
     }
 
-    function goNextQuestion() {
-      if (state.locked) return;
+    function advanceQuestion() {
       state.roundIndex += 1;
+
       if (state.roundIndex >= ROUND_SIZE) {
         renderRoundComplete();
         return;
       }
+
       renderQuestion(state.roundQuestions[state.roundIndex]);
     }
 
@@ -795,8 +691,7 @@
 
     function getRoundQuestions(categoryId) {
       if (categoryId === "all") {
-        const allQuestions = Object.values(questionPools).flat();
-        return shuffle(allQuestions).slice(0, ROUND_SIZE);
+        return shuffle(Object.values(questionPools).flat()).slice(0, ROUND_SIZE);
       }
       return shuffle(questionPools[categoryId]).slice(0, ROUND_SIZE);
     }
@@ -826,6 +721,7 @@
       ];
       const dayVisuals = ["☀️🌈", "🌞🏫", "☀️🌻", "🌤️🐦", "🌞🏡"];
       const nightVisuals = ["🌙⭐", "🌛🏠", "🌙✨", "🌌⭐", "🌜🛏️"];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const v = variants[i % variants.length];
         pool.push(makeSideQuestion(v.ask, v.answer,
@@ -846,13 +742,14 @@
         { text: "อันไหนดูยาวกว่า", answer: "long" },
         { text: "อันไหนดูสั้นกว่า", answer: "short" }
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const ask = asks[i % asks.length];
         const longColor = colors[i % colors.length].value;
         const shortColor = colors[(i + 3) % colors.length].value;
         pool.push(makeSideQuestion(ask.text, ask.answer,
-          { answer: "long", visual: `<div class="big-line" style="color:${longColor}"></div>`, note: "เส้นยาว", titleColor: longColor },
-          { answer: "short", visual: `<div class="short-line" style="color:${shortColor}"></div>`, note: "เส้นสั้น", titleColor: shortColor }
+          { answer: "long", visual: '<div class="big-line" style="color:' + longColor + '"></div>', note: "เส้นยาว", titleColor: longColor },
+          { answer: "short", visual: '<div class="short-line" style="color:' + shortColor + '"></div>', note: "เส้นสั้น", titleColor: shortColor }
         ));
       }
       return pool;
@@ -868,15 +765,22 @@
         { text: "ฝั่งไหนมีมากกว่า", answer: "many" },
         { text: "ฝั่งไหนมีน้อยกว่า", answer: "few" }
       ];
-      const makeItems = (count, item) => `<div class="items-row">${Array.from({ length: count }, () => `<div class="mini-item">${item}</div>`).join("")}</div>`;
+
+      function makeItems(count, item) {
+        let html = '<div class="items-row">';
+        for (let i = 0; i < count; i++) html += '<div class="mini-item">' + item + '</div>';
+        html += '</div>';
+        return html;
+      }
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const item = itemList[i % itemList.length];
         const few = 2 + (i % 3);
         const many = 6 + (i % 4);
         const ask = asks[i % asks.length];
         pool.push(makeSideQuestion(ask.text, ask.answer,
-          { answer: "few", visual: makeItems(few, item), note: `${few} ชิ้น`, titleColor: "#ff9f43" },
-          { answer: "many", visual: makeItems(many, item), note: `${many} ชิ้น`, titleColor: "#44c767" }
+          { answer: "few", visual: makeItems(few, item), note: few + " ชิ้น", titleColor: "#ff9f43" },
+          { answer: "many", visual: makeItems(many, item), note: many + " ชิ้น", titleColor: "#44c767" }
         ));
       }
       return pool;
@@ -885,19 +789,20 @@
     function makeColorPool() {
       const pool = [];
       const questionForms = [
-        color => `ฝั่งไหน${color.name}`,
-        color => `เลือก${color.name}`,
-        color => `สีไหนคือ${color.name}`,
-        color => `กล่องไหนเป็น${color.name}`,
-        color => `คลิกฝั่งที่เป็น${color.name}`
+        color => "ฝั่งไหน" + color.name,
+        color => "เลือก" + color.name,
+        color => "สีไหนคือ" + color.name,
+        color => "กล่องไหนเป็น" + color.name,
+        color => "คลิกฝั่งที่เป็น" + color.name
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = colors[i % colors.length];
         const other = colors[(i + 2 + (i % 3)) % colors.length];
         const q = questionForms[i % questionForms.length](target);
         pool.push(makeSideQuestion(q, target.answer,
-          { answer: target.answer, visual: `<div class="color-tile" style="background:${target.value}"></div>`, note: target.name, titleColor: target.value },
-          { answer: other.answer, visual: `<div class="color-tile" style="background:${other.value}"></div>`, note: other.name, titleColor: other.value }
+          { answer: target.answer, visual: '<div class="color-tile" style="background:' + target.value + '"></div>', note: target.name, titleColor: target.value },
+          { answer: other.answer, visual: '<div class="color-tile" style="background:' + other.value + '"></div>', note: other.name, titleColor: other.value }
         ));
       }
       return pool;
@@ -906,19 +811,20 @@
     function makeLetterPool() {
       const pool = [];
       const forms = [
-        l => `ฝั่งไหนตัว ${l}`,
-        l => `เลือกตัว ${l}`,
-        l => `ตัวอักษรไหนคือ ${l}`,
-        l => `คลิกตัว ${l}`,
-        l => `หาตัว ${l} ให้เจอ`
+        l => "ฝั่งไหนตัว " + l,
+        l => "เลือกตัว " + l,
+        l => "ตัวอักษรไหนคือ " + l,
+        l => "คลิกตัว " + l,
+        l => "หาตัว " + l + " ให้เจอ"
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = englishLetters[i % englishLetters.length];
         const other = englishLetters[(i + 5 + (i % 7)) % englishLetters.length];
         const q = forms[i % forms.length](target);
         pool.push(makeSideQuestion(q, target,
-          { answer: target, visual: `<div class="letter-card">${target}</div>`, note: `ตัว ${target}`, titleColor: "#845ec2" },
-          { answer: other, visual: `<div class="letter-card">${other}</div>`, note: `ตัว ${other}`, titleColor: "#d65db1" }
+          { answer: target, visual: '<div class="letter-card">' + target + '</div>', note: "ตัว " + target, titleColor: "#845ec2" },
+          { answer: other, visual: '<div class="letter-card">' + other + '</div>', note: "ตัว " + other, titleColor: "#d65db1" }
         ));
       }
       return pool;
@@ -927,45 +833,23 @@
     function makeThaiPool() {
       const pool = [];
       const forms = [
-        {
-          display: l => `ฝั่งไหน ${l.text}`,
-          speak: l => `ฝั่งไหน คือ ตัวอักษร ${l.speak}`
-        },
-        {
-          display: l => `เลือก ${l.text}`,
-          speak: l => `เลือก ตัวอักษร ${l.speak}`
-        },
-        {
-          display: l => `ตัวไหนคือ ${l.text}`,
-          speak: l => `ตัวไหน คือ ตัวอักษร ${l.speak}`
-        },
-        {
-          display: l => `คลิก ${l.text}`,
-          speak: l => `คลิก ตัวอักษร ${l.speak}`
-        },
-        {
-          display: l => `หาตัว ${l.char} ให้เจอ`,
-          speak: l => `หา ตัวอักษร ${l.speak} ให้เจอ`
-        },
-        {
-          display: l => `ตัว ${l.char} อยู่ฝั่งไหน`,
-          speak: l => `ตัวอักษร ${l.speak} อยู่ฝั่งไหน`
-        },
-        {
-          display: l => `คลิกตัว ${l.char}`,
-          speak: l => `คลิก ตัวอักษร ${l.speak}`
-        }
+        { display: l => "ฝั่งไหน " + l.text, speak: l => "ฝั่งไหน คือ ตัวอักษร " + l.speak },
+        { display: l => "เลือก " + l.text, speak: l => "เลือก ตัวอักษร " + l.speak },
+        { display: l => "ตัวไหนคือ " + l.text, speak: l => "ตัวไหน คือ ตัวอักษร " + l.speak },
+        { display: l => "คลิก " + l.text, speak: l => "คลิก ตัวอักษร " + l.speak },
+        { display: l => "หาตัว " + l.char + " ให้เจอ", speak: l => "หา ตัวอักษร " + l.speak + " ให้เจอ" },
+        { display: l => "ตัว " + l.char + " อยู่ฝั่งไหน", speak: l => "ตัวอักษร " + l.speak + " อยู่ฝั่งไหน" },
+        { display: l => "คลิกตัว " + l.char, speak: l => "คลิก ตัวอักษร " + l.speak }
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = thaiLetters[i % thaiLetters.length];
         const other = thaiLetters[(i + 4 + (i % 5)) % thaiLetters.length];
         const form = forms[i % forms.length];
-        const displayQuestion = form.display(target);
-        const spokenQuestion = form.speak(target);
-        pool.push(makeSideQuestion(displayQuestion, target.char,
-          { answer: target.char, visual: `<div class="letter-card">${target.char}</div>`, note: `${target.emoji} ${target.text}`, titleColor: "#ff9671" },
-          { answer: other.char, visual: `<div class="letter-card">${other.char}</div>`, note: `${other.emoji} ${other.text}`, titleColor: "#ffc75f" },
-          spokenQuestion
+        pool.push(makeSideQuestion(form.display(target), target.char,
+          { answer: target.char, visual: '<div class="letter-card">' + target.char + '</div>', note: target.emoji + " " + target.text, titleColor: "#ff9671" },
+          { answer: other.char, visual: '<div class="letter-card">' + other.char + '</div>', note: other.emoji + " " + other.text, titleColor: "#ffc75f" },
+          form.speak(target)
         ));
       }
       return pool;
@@ -974,12 +858,13 @@
     function makeShapePool() {
       const pool = [];
       const forms = [
-        s => ({ question: `รูปไหน${s.name}`, speak: `รูปไหน${s.speak || s.name}` }),
-        s => ({ question: `เลือก${s.name}`, speak: `เลือก${s.speak || s.name}` }),
-        s => ({ question: `ฝั่งไหนเป็น${s.name}`, speak: `ฝั่งไหนเป็น${s.speak || s.name}` }),
-        s => ({ question: `คลิกรูป${s.name}`, speak: `คลิก${s.speak || s.name}` }),
-        s => ({ question: `หาภาพ${s.name} ให้เจอ`, speak: `หาภาพ${s.speak || s.name} ให้เจอ` })
+        s => ({ question: "รูปไหน" + s.name, speak: "รูปไหน" + (s.speak || s.name) }),
+        s => ({ question: "เลือก" + s.name, speak: "เลือก" + (s.speak || s.name) }),
+        s => ({ question: "ฝั่งไหนเป็น" + s.name, speak: "ฝั่งไหนเป็น" + (s.speak || s.name) }),
+        s => ({ question: "คลิกรูป" + s.name, speak: "คลิก" + (s.speak || s.name) }),
+        s => ({ question: "หาภาพ" + s.name + " ให้เจอ", speak: "หาภาพ" + (s.speak || s.name) + " ให้เจอ" })
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = shapeList[i % shapeList.length];
         const other = shapeList[(i + 1 + (i % 2)) % shapeList.length];
@@ -996,19 +881,20 @@
     function makeNumberPool() {
       const pool = [];
       const forms = [
-        n => ({ question: `ฝั่งไหนเลข ${n.digit}`, speak: `ฝั่งไหน ${n.speak}` }),
-        n => ({ question: `เลือกเลข ${n.digit}`, speak: `เลือก ${n.speak}` }),
-        n => ({ question: `ตัวเลขไหนคือ ${n.digit}`, speak: `ตัวเลขไหนคือ ${n.speak}` }),
-        n => ({ question: `คลิกเลข ${n.digit}`, speak: `คลิก ${n.speak}` }),
-        n => ({ question: `หาเลข ${n.digit} ให้เจอ`, speak: `หา ${n.speak} ให้เจอ` })
+        n => ({ question: "ฝั่งไหนเลข " + n.digit, speak: "ฝั่งไหน " + n.speak }),
+        n => ({ question: "เลือกเลข " + n.digit, speak: "เลือก " + n.speak }),
+        n => ({ question: "ตัวเลขไหนคือ " + n.digit, speak: "ตัวเลขไหนคือ " + n.speak }),
+        n => ({ question: "คลิกเลข " + n.digit, speak: "คลิก " + n.speak }),
+        n => ({ question: "หาเลข " + n.digit + " ให้เจอ", speak: "หา " + n.speak + " ให้เจอ" })
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = numberList[i % numberList.length];
         const other = numberList[(i + 3 + (i % 5)) % numberList.length];
         const form = forms[i % forms.length](target);
         pool.push(makeSideQuestion(form.question, target.digit,
-          { answer: target.digit, visual: `<div class="letter-card">${target.digit}</div>`, note: `${target.emoji} ${target.speak}`, titleColor: "#ff6f91" },
-          { answer: other.digit, visual: `<div class="letter-card">${other.digit}</div>`, note: `${other.emoji} ${other.speak}`, titleColor: "#ffc75f" },
+          { answer: target.digit, visual: '<div class="letter-card">' + target.digit + '</div>', note: target.emoji + " " + target.speak, titleColor: "#ff6f91" },
+          { answer: other.digit, visual: '<div class="letter-card">' + other.digit + '</div>', note: other.emoji + " " + other.speak, titleColor: "#ffc75f" },
           form.speak
         ));
       }
@@ -1018,12 +904,13 @@
     function makeAnimalPool() {
       const pool = [];
       const forms = [
-        a => ({ question: `ตัวไหนคือ${a.name}`, speak: `ตัวไหนคือ ${a.speak}` }),
-        a => ({ question: `เลือก${a.name}`, speak: `เลือก ${a.speak}` }),
-        a => ({ question: `ฝั่งไหนเป็น${a.name}`, speak: `ฝั่งไหนเป็น ${a.speak}` }),
-        a => ({ question: `คลิก${a.name}`, speak: `คลิก ${a.speak}` }),
-        a => ({ question: `หา${a.name}ให้เจอ`, speak: `หา ${a.speak} ให้เจอ` })
+        a => ({ question: "ตัวไหนคือ" + a.name, speak: "ตัวไหนคือ " + a.speak }),
+        a => ({ question: "เลือก" + a.name, speak: "เลือก " + a.speak }),
+        a => ({ question: "ฝั่งไหนเป็น" + a.name, speak: "ฝั่งไหนเป็น " + a.speak }),
+        a => ({ question: "คลิก" + a.name, speak: "คลิก " + a.speak }),
+        a => ({ question: "หา" + a.name + "ให้เจอ", speak: "หา " + a.speak + " ให้เจอ" })
       ];
+
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = animalList[i % animalList.length];
         const other = animalList[(i + 7 + (i % 6)) % animalList.length];
@@ -1050,9 +937,7 @@
     };
 
     function stopSpeaking() {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     }
 
     function speakText(text) {
@@ -1084,9 +969,9 @@
         const star = document.createElement("div");
         star.className = "star";
         star.textContent = pick(["⭐", "✨", "🌟", "💛"]);
-        star.style.left = `${x + rand(-80, 80)}px`;
-        star.style.top = `${y + rand(-30, 30)}px`;
-        star.style.animationDelay = `${i * 35}ms`;
+        star.style.left = (x + rand(-80, 80)) + "px";
+        star.style.top = (y + rand(-30, 30)) + "px";
+        star.style.animationDelay = (i * 35) + "ms";
         stars.appendChild(star);
         setTimeout(() => star.remove(), 1200);
       }
@@ -1109,23 +994,24 @@
     }
 
     function playGoodSound() {
-      playTone(660, .12, "triangle");
-      setTimeout(() => playTone(880, .16, "triangle"), 120);
+      playTone(660, 0.12, "triangle");
+      setTimeout(() => playTone(880, 0.16, "triangle"), 120);
     }
 
     function playTrySound() {
-      playTone(240, .16, "sine");
+      playTone(240, 0.16, "sine");
     }
 
     listenBtn.addEventListener("click", () => {
       const current = state.roundQuestions[state.roundIndex];
-      speakQuestion(current?.speakText || questionText.textContent);
+      speakQuestion(current ? current.speakText : questionText.textContent);
     });
 
     nextBtn.addEventListener("click", () => {
       stopSpeaking();
-      state.locked = false;
-      goNextQuestion();
+      if (state.roundIndex >= ROUND_SIZE) return;
+      state.locked = true;
+      advanceQuestion();
     });
 
     resetBtn.addEventListener("click", resetAll);
