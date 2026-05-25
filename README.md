@@ -2,6 +2,7 @@
 Play here:
 - Learning: https://man2454.github.io/develop-kids/mj.html
 - Learning: https://man2454.github.io/develop-kids/matching-game.html
+- Learning: https://man2454.github.io/develop-kids/line-matching.html
 
 # 3 Lane Wave System (Prototype)
 
