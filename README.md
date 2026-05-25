@@ -1,3 +1,7 @@
+# For Thai Kids
+Play here:
+- Learning: https://man2454.github.io/develop-kids/mj.html
+
 # 3 Lane Wave System (Prototype)
 
 Play here:
