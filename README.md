@@ -30,7 +30,7 @@ Feedback and suggestions are welcome.
 # 3 Lane Wave System (Prototype)
 
 Play here:
-- Fire: https://man2454.github.io/develop-kids/
+- Fire: https://man2454.github.io/develop-kids/fire3lane.html
 - XO: https://man2454.github.io/develop-kids/xo.html
 - Neo Dodge: https://man2454.github.io/develop-kids/dodge.html
 
