@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
@@ -11,7 +13,6 @@
       --bg3: #b9f3ff;
       --card: rgba(255, 255, 255, 0.93);
       --text: #3d315b;
-      --primary: #6c63ff;
       --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
     }
 
@@ -91,7 +92,7 @@
 
     .category-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
     }
 
@@ -101,7 +102,7 @@
       border: 0;
       cursor: pointer;
       font-family: inherit;
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      transition: transform .12s ease, filter .12s ease;
     }
 
     .category-btn:hover,
@@ -122,7 +123,7 @@
       padding: 12px 8px;
       border-radius: 24px;
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 900;
       box-shadow: inset 0 -7px 0 rgba(0,0,0,.12), 0 8px 18px rgba(0,0,0,.12);
     }
@@ -146,6 +147,8 @@
     .cat-letter { background: linear-gradient(135deg, #845ec2, #d65db1); }
     .cat-thai { background: linear-gradient(135deg, #ff9671, #ffc75f); }
     .cat-shape { background: linear-gradient(135deg, #00b8a9, #72efdd); }
+    .cat-number { background: linear-gradient(135deg, #ff6f91, #ffc75f); }
+    .cat-animal { background: linear-gradient(135deg, #2fcf6f, #00c2a8); }
 
     .score-box {
       display: grid;
@@ -243,7 +246,7 @@
       display: grid;
       place-items: center;
       padding: 12px;
-      font-size: clamp(74px, 10vw, 140px);
+      font-size: clamp(80px, 11vw, 150px);
       line-height: 1;
     }
 
@@ -519,7 +522,9 @@
       { id: "color", name: "สี", icon: "🎨", className: "cat-color" },
       { id: "letter", name: "A B C", icon: "🔤", className: "cat-letter" },
       { id: "thai", name: "กอ ไก่", icon: "🐔", className: "cat-thai" },
-      { id: "shape", name: "รูปทรง", icon: "⭕", className: "cat-shape" }
+      { id: "shape", name: "รูปทรง", icon: "⭕", className: "cat-shape" },
+      { id: "number", name: "ตัวเลข", icon: "🔢", className: "cat-number" },
+      { id: "animal", name: "สัตว์", icon: "🐶", className: "cat-animal" }
     ];
 
     const state = {
@@ -563,6 +568,7 @@
     ];
 
     const englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
     const thaiLetters = [
       { char: "ก", text: "ก ไก่", speak: "กอไก่", emoji: "🐔" },
       { char: "ข", text: "ข ไข่", speak: "ขอไข่", emoji: "🥚" },
@@ -588,7 +594,7 @@
       { char: "ถ", text: "ถ ถุง", speak: "ถอถุง", emoji: "🛍️" },
       { char: "ท", text: "ท ทหาร", speak: "ทอทหาร", emoji: "🎖️" },
       { char: "ธ", text: "ธ ธง", speak: "ทอธง", emoji: "🚩" },
-      { char: "น", text: "น หนู", speak: "นอน หนู", emoji: "🐭" },
+      { char: "น", text: "น หนู", speak: "นอ หนู", emoji: "🐭" },
       { char: "บ", text: "บ ใบไม้", speak: "บอใบไม้", emoji: "🍃" },
       { char: "ป", text: "ป ปลา", speak: "ปอ ปลา", emoji: "🐟" },
       { char: "ผ", text: "ผ ผึ้ง", speak: "ผ ผึ้ง", emoji: "🐝" },
@@ -623,6 +629,48 @@
     ];
 
     const itemList = ["🍎", "⭐", "🐟", "🚗", "🌸", "🧁", "🍌", "⚽", "🐻", "🎈"];
+
+    const numberList = [
+      { digit: "0", speak: "เลขศูนย์", emoji: "⭕" },
+      { digit: "1", speak: "เลขหนึ่ง", emoji: "☝️" },
+      { digit: "2", speak: "เลขสอง", emoji: "✌️" },
+      { digit: "3", speak: "เลขสาม", emoji: "🍀" },
+      { digit: "4", speak: "เลขสี่", emoji: "🚗" },
+      { digit: "5", speak: "เลขห้า", emoji: "⭐" },
+      { digit: "6", speak: "เลขหก", emoji: "🎈" },
+      { digit: "7", speak: "เลขเจ็ด", emoji: "🌈" },
+      { digit: "8", speak: "เลขแปด", emoji: "⛄" },
+      { digit: "9", speak: "เลขเก้า", emoji: "🎁" },
+      { digit: "10", speak: "เลขสิบ", emoji: "🏆" }
+    ];
+
+    const animalList = [
+      { name: "หมา", speak: "หมา", answer: "dog", emoji: "🐶" },
+      { name: "แมว", speak: "แมว", answer: "cat", emoji: "🐱" },
+      { name: "หนู", speak: "หนู", answer: "mouse", emoji: "🐭" },
+      { name: "กระต่าย", speak: "กระต่าย", answer: "rabbit", emoji: "🐰" },
+      { name: "หมี", speak: "หมี", answer: "bear", emoji: "🐻" },
+      { name: "แพนด้า", speak: "แพนด้า", answer: "panda", emoji: "🐼" },
+      { name: "สิงโต", speak: "สิงโต", answer: "lion", emoji: "🦁" },
+      { name: "เสือ", speak: "เสือ", answer: "tiger", emoji: "🐯" },
+      { name: "วัว", speak: "วัว", answer: "cow", emoji: "🐮" },
+      { name: "หมู", speak: "หมู", answer: "pig", emoji: "🐷" },
+      { name: "กบ", speak: "กบ", answer: "frog", emoji: "🐸" },
+      { name: "ลิง", speak: "ลิง", answer: "monkey", emoji: "🐵" },
+      { name: "ไก่", speak: "ไก่", answer: "chicken", emoji: "🐔" },
+      { name: "นก", speak: "นก", answer: "bird", emoji: "🐦" },
+      { name: "เป็ด", speak: "เป็ด", answer: "duck", emoji: "🦆" },
+      { name: "นกฮูก", speak: "นกฮูก", answer: "owl", emoji: "🦉" },
+      { name: "ช้าง", speak: "ช้าง", answer: "elephant", emoji: "🐘" },
+      { name: "ม้า", speak: "ม้า", answer: "horse", emoji: "🐴" },
+      { name: "ปลา", speak: "ปลา", answer: "fish", emoji: "🐟" },
+      { name: "ปลาวาฬ", speak: "ปลาวาฬ", answer: "whale", emoji: "🐳" },
+      { name: "โลมา", speak: "โลมา", answer: "dolphin", emoji: "🐬" },
+      { name: "เต่า", speak: "เต่า", answer: "turtle", emoji: "🐢" },
+      { name: "งู", speak: "งู", answer: "snake", emoji: "🐍" },
+      { name: "ผึ้ง", speak: "ผึ้ง", answer: "bee", emoji: "🐝" },
+      { name: "ผีเสื้อ", speak: "ผีเสื้อ", answer: "butterfly", emoji: "🦋" }
+    ];
 
     function renderCategories() {
       categoryGrid.innerHTML = "";
@@ -724,6 +772,7 @@
     }
 
     function goNextQuestion() {
+      if (state.locked) return;
       state.roundIndex += 1;
       if (state.roundIndex >= ROUND_SIZE) {
         renderRoundComplete();
@@ -733,6 +782,7 @@
     }
 
     function startNewRound() {
+      stopSpeaking();
       state.roundIndex = 0;
       state.roundQuestions = getRoundQuestions(state.category);
       renderQuestion(state.roundQuestions[0]);
@@ -927,19 +977,64 @@
     function makeShapePool() {
       const pool = [];
       const forms = [
-        s => `รูปไหน${s.name}`,
-        s => `เลือก${s.name}`,
-        s => `ฝั่งไหนเป็น${s.name}`,
-        s => `คลิกรูป${s.name}`,
-        s => `หาภาพ${s.name} ให้เจอ`
+        s => ({ question: `รูปไหน${s.name}`, speak: `รูปไหน${s.speak || s.name}` }),
+        s => ({ question: `เลือก${s.name}`, speak: `เลือก${s.speak || s.name}` }),
+        s => ({ question: `ฝั่งไหนเป็น${s.name}`, speak: `ฝั่งไหนเป็น${s.speak || s.name}` }),
+        s => ({ question: `คลิกรูป${s.name}`, speak: `คลิก${s.speak || s.name}` }),
+        s => ({ question: `หาภาพ${s.name} ให้เจอ`, speak: `หาภาพ${s.speak || s.name} ให้เจอ` })
       ];
       for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
         const target = shapeList[i % shapeList.length];
         const other = shapeList[(i + 1 + (i % 2)) % shapeList.length];
-        const q = forms[i % forms.length](target);
-        pool.push(makeSideQuestion(q, target.answer,
+        const form = forms[i % forms.length](target);
+        pool.push(makeSideQuestion(form.question, target.answer,
           { answer: target.answer, visual: target.html, note: target.name, titleColor: "#00b8a9" },
-          { answer: other.answer, visual: other.html, note: other.name, titleColor: "#6c63ff" }
+          { answer: other.answer, visual: other.html, note: other.name, titleColor: "#6c63ff" },
+          form.speak
+        ));
+      }
+      return pool;
+    }
+
+    function makeNumberPool() {
+      const pool = [];
+      const forms = [
+        n => ({ question: `ฝั่งไหนเลข ${n.digit}`, speak: `ฝั่งไหน ${n.speak}` }),
+        n => ({ question: `เลือกเลข ${n.digit}`, speak: `เลือก ${n.speak}` }),
+        n => ({ question: `ตัวเลขไหนคือ ${n.digit}`, speak: `ตัวเลขไหนคือ ${n.speak}` }),
+        n => ({ question: `คลิกเลข ${n.digit}`, speak: `คลิก ${n.speak}` }),
+        n => ({ question: `หาเลข ${n.digit} ให้เจอ`, speak: `หา ${n.speak} ให้เจอ` })
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = numberList[i % numberList.length];
+        const other = numberList[(i + 3 + (i % 5)) % numberList.length];
+        const form = forms[i % forms.length](target);
+        pool.push(makeSideQuestion(form.question, target.digit,
+          { answer: target.digit, visual: `<div class="letter-card">${target.digit}</div>`, note: `${target.emoji} ${target.speak}`, titleColor: "#ff6f91" },
+          { answer: other.digit, visual: `<div class="letter-card">${other.digit}</div>`, note: `${other.emoji} ${other.speak}`, titleColor: "#ffc75f" },
+          form.speak
+        ));
+      }
+      return pool;
+    }
+
+    function makeAnimalPool() {
+      const pool = [];
+      const forms = [
+        a => ({ question: `ตัวไหนคือ${a.name}`, speak: `ตัวไหนคือ ${a.speak}` }),
+        a => ({ question: `เลือก${a.name}`, speak: `เลือก ${a.speak}` }),
+        a => ({ question: `ฝั่งไหนเป็น${a.name}`, speak: `ฝั่งไหนเป็น ${a.speak}` }),
+        a => ({ question: `คลิก${a.name}`, speak: `คลิก ${a.speak}` }),
+        a => ({ question: `หา${a.name}ให้เจอ`, speak: `หา ${a.speak} ให้เจอ` })
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = animalList[i % animalList.length];
+        const other = animalList[(i + 7 + (i % 6)) % animalList.length];
+        const form = forms[i % forms.length](target);
+        pool.push(makeSideQuestion(form.question, target.answer,
+          { answer: target.answer, visual: target.emoji, note: target.name, titleColor: "#2fcf6f" },
+          { answer: other.answer, visual: other.emoji, note: other.name, titleColor: "#00c2a8" },
+          form.speak
         ));
       }
       return pool;
@@ -952,7 +1047,9 @@
       color: makeColorPool(),
       letter: makeLetterPool(),
       thai: makeThaiPool(),
-      shape: makeShapePool()
+      shape: makeShapePool(),
+      number: makeNumberPool(),
+      animal: makeAnimalPool()
     };
 
     function stopSpeaking() {
@@ -1027,7 +1124,13 @@
       const current = state.roundQuestions[state.roundIndex];
       speakQuestion(current?.speakText || questionText.textContent);
     });
-    nextBtn.addEventListener("click", goNextQuestion);
+
+    nextBtn.addEventListener("click", () => {
+      stopSpeaking();
+      state.locked = false;
+      goNextQuestion();
+    });
+
     resetBtn.addEventListener("click", resetAll);
 
     if ("speechSynthesis" in window) {
@@ -1040,3 +1143,18 @@
   </script>
 </body>
 </html>
+'''
+
+out = Path("/mnt/data/index.html")
+out.write_text(html, encoding="utf-8")
+
+# Quick sanity checks
+text = out.read_text(encoding="utf-8")
+assert text.count("<html") == 1
+assert text.count("</html>") == 1
+assert "animal: makeAnimalPool()" in text
+assert "number: makeNumberPool()" in text
+assert 'speak: "นอ หนู"' in text
+assert 'speak: "นอน หนู""' not in text
+
+print(f"Created {out} ({out.stat().st_size:,} bytes)")
