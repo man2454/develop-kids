@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เกมลากเส้นจับคู่</title>
+  <style>
+    :root {
+      --bg1: #fff7ad;
+      --bg2: #ffd1e8;
+      --bg3: #b9f3ff;
+      --card: rgba(255, 255, 255, 0.94);
+      --text: #3d315b;
+      --purple: #6c63ff;
+      --green: #44c767;
+      --red: #ff5c7a;
+      --orange: #ff9f43;
+      --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,255,255,.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 90% 10%, rgba(255,255,255,.75) 0 6%, transparent 7%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1200px, 96vw);
+      margin: 0 auto;
+      padding: 24px 0 34px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .title-area h1 {
+      margin: 0 0 6px;
+      font-size: clamp(30px, 4vw, 50px);
+      line-height: 1.05;
+      color: #5b4bdb;
+      text-shadow: 2px 2px 0 #fff;
+    }
+
+    .title-area p {
+      margin: 0;
+      font-size: clamp(16px, 2vw, 22px);
+      color: #6d5f8f;
+      font-weight: 800;
+    }
+
+    .mascot {
+      min-width: 110px;
+      height: 110px;
+      display: grid;
+      place-items: center;
+      font-size: 66px;
+      background: linear-gradient(160deg, #ffffff, #e8fbff);
+      border-radius: 32px;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.04);
+      transform: rotate(4deg);
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .category-btn,
+    .action-btn,
+    .match-item {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform .12s ease, filter .12s ease;
+    }
+
+    .category-btn:hover,
+    .action-btn:hover,
+    .match-item:hover {
+      transform: translateY(-3px) scale(1.02);
+      filter: brightness(1.03);
+    }
+
+    .category-btn:active,
+    .action-btn:active,
+    .match-item:active {
+      transform: translateY(1px) scale(.98);
+    }
+
+    .category-btn {
+      min-height: 92px;
+      padding: 10px 8px;
+      border-radius: 24px;
+      color: white;
+      font-size: 17px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.12), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .category-btn .icon {
+      display: block;
+      font-size: 32px;
+      margin-bottom: 3px;
+    }
+
+    .category-btn.active {
+      outline: 6px solid #fff;
+      transform: scale(1.04);
+    }
+
+    .cat-same { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .cat-fruit { background: linear-gradient(135deg, #ff9671, #ffc75f); }
+    .cat-thai { background: linear-gradient(135deg, #ff5c7a, #d65db1); }
+    .cat-number { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+    .cat-english { background: linear-gradient(135deg, #845ec2, #d65db1); }
+    .cat-color { background: linear-gradient(135deg, #2fcf6f, #00c2a8); }
+
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      height: 100%;
+    }
+
+    .score-item {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fff, #f8fbff);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.05);
+    }
+
+    .score-item strong {
+      display: block;
+      font-size: clamp(28px, 3.4vw, 42px);
+      color: #5b4bdb;
+      line-height: 1;
+    }
+
+    .score-item span {
+      font-size: 15px;
+      color: #7b6c99;
+      font-weight: 900;
+    }
+
+    .instruction {
+      text-align: center;
+      padding: 18px;
+      margin-bottom: 18px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #ffffff, #fff6fb);
+      border: 3px dashed rgba(108, 99, 255, .35);
+      font-size: clamp(24px, 3.4vw, 42px);
+      font-weight: 900;
+      color: #3d315b;
+    }
+
+    .game-area {
+      position: relative;
+      min-height: 570px;
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) minmax(160px, .8fr) minmax(210px, 1fr);
+      gap: 18px;
+      padding: 8px;
+      overflow: hidden;
+    }
+
+    .column {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+      z-index: 2;
+    }
+
+    .middle-hint {
+      display: grid;
+      place-items: center;
+      color: rgba(61, 49, 91, .35);
+      font-size: clamp(42px, 7vw, 90px);
+      font-weight: 900;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .match-item {
+      min-height: 110px;
+      border-radius: 28px;
+      background: #fff;
+      border: 6px solid #fff;
+      box-shadow: var(--shadow), inset 0 -8px 0 rgba(0,0,0,.05);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      text-align: left;
+      position: relative;
+      touch-action: none;
+    }
+
+    .right-column .match-item {
+      grid-template-columns: 1fr auto;
+      text-align: right;
+    }
+
+    .match-item .big {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #f8f6ff, #eef8ff);
+      font-size: 48px;
+      font-weight: 900;
+      color: #5b4bdb;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.05);
+    }
+
+    .right-column .match-item .big {
+      order: 2;
+    }
+
+    .match-item .label {
+      font-size: clamp(22px, 2.6vw, 34px);
+      font-weight: 900;
+      color: #4d416a;
+      line-height: 1.1;
+    }
+
+    .match-item .small {
+      display: block;
+      margin-top: 4px;
+      font-size: 15px;
+      color: #8a7aa8;
+      font-weight: 800;
+    }
+
+    .match-item.selected {
+      outline: 6px solid #ffe16b;
+      transform: scale(1.03);
+    }
+
+    .match-item.done {
+      pointer-events: none;
+      border-color: #49d86b;
+      background: linear-gradient(180deg, #ffffff, #f1fff5);
+    }
+
+    .match-item.wrong {
+      animation: wrongShake .36s ease;
+      border-color: #ff5c7a;
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-6px); }
+    }
+
+    .line-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .line-layer line {
+      stroke-linecap: round;
+      filter: drop-shadow(0 4px 4px rgba(0,0,0,.14));
+    }
+
+    .bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .feedback {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 24px;
+      background: #ffffff;
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 900;
+      color: #5b4bdb;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.04);
+    }
+
+    .action-btn {
+      min-width: 160px;
+      min-height: 72px;
+      border-radius: 24px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.14), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .listen-btn { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .reset-btn { background: linear-gradient(135deg, #ff8a3d, #ff5c7a); }
+
+    .color-box {
+      width: 78px;
+      height: 78px;
+      border-radius: 24px;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.12), 0 6px 12px rgba(0,0,0,.10);
+    }
+
+    .count-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4px;
+      max-width: 104px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 99;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 34px;
+      animation: fly 900ms ease-out forwards;
+    }
+
+    @keyframes fly {
+      0% { transform: translateY(0) scale(.4) rotate(0); opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.4) rotate(180deg); opacity: 0; }
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 15px;
+      color: rgba(61, 49, 91, .72);
+      font-weight: 800;
+    }
+
+    @media (max-width: 920px) {
+      header,
+      .top-row,
+      .bottom-bar {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        text-align: center;
+        justify-items: center;
+      }
+
+      .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .score-box {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .game-area {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .middle-hint {
+        display: none;
+      }
+
+      .match-item {
+        min-height: 96px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <main class="app">
+    <header>
+      <div class="title-area">
+        <h1>เกมลากเส้นจับคู่</h1>
+        <p>ลากจากฝั่งซ้ายไปหาคำตอบฝั่งขวา ถ้าถูกเส้นจะติดไว้</p>
+      </div>
+      <div class="mascot" aria-hidden="true">🧩</div>
+    </header>
+
+    <section class="top-row">
+      <div class="panel">
+        <div class="category-grid" id="categoryGrid"></div>
+      </div>
+
+      <div class="panel score-box">
+        <div class="score-item"><div><strong id="matchedText">0/4</strong><span>จับคู่แล้ว</span></div></div>
+        <div class="score-item"><div><strong id="tryText">0</strong><span>จำนวนครั้ง</span></div></div>
+        <div class="score-item"><div><strong id="bestText">-</strong><span>ดีที่สุด</span></div></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="instruction" id="instruction">ลากเส้นจับคู่ให้ถูกต้อง</div>
+
+      <div class="game-area" id="gameArea">
+        <svg class="line-layer" id="lineLayer"></svg>
+        <div class="column left-column" id="leftColumn"></div>
+        <div class="middle-hint">→</div>
+        <div class="column right-column" id="rightColumn"></div>
+      </div>
+    </section>
+
+    <section class="bottom-bar">
+      <div class="feedback" id="feedback">พร้อมแล้ว เริ่มลากเส้นได้เลย</div>
+      <button class="action-btn listen-btn" id="listenBtn">ฟังคำสั่ง</button>
+      <button class="action-btn reset-btn" id="resetBtn">เริ่มใหม่</button>
+    </section>
+
+    <div class="footer-note">เหมาะสำหรับเด็กอนุบาล ใช้ฝึกการลากเม้าส์ การสังเกต และการเชื่อมโยงภาพกับความหมาย</div>
+  </main>
+
+  <script>
+    const PAIRS_PER_ROUND = 4;
+
+    const categories = [
+      { id: "same", name: "ภาพเหมือน", icon: "🧩", className: "cat-same", instruction: "ลากภาพไปหาภาพที่เหมือนกัน", speak: "ลากภาพไปหาภาพที่เหมือนกัน" },
+      { id: "fruit", name: "ผลไม้", icon: "🍎", className: "cat-fruit", instruction: "ลากผลไม้ไปหาผลไม้ที่เหมือนกัน", speak: "ลากผลไม้ไปหาผลไม้ที่เหมือนกัน" },
+      { id: "thai", name: "กอ ไก่", icon: "🐔", className: "cat-thai", instruction: "ลากตัวอักษรไทยไปหาภาพที่ตรงกัน", speak: "ลากตัวอักษรไทยไปหาภาพที่ตรงกัน" },
+      { id: "number", name: "ตัวเลข", icon: "🔢", className: "cat-number", instruction: "ลากตัวเลขไปหาจำนวนที่เท่ากัน", speak: "ลากตัวเลขไปหาจำนวนที่เท่ากัน" },
+      { id: "english", name: "A to Z", icon: "🔤", className: "cat-english", instruction: "ลากตัวอักษรอังกฤษไปหาภาพที่ขึ้นต้นด้วยตัวนั้น", speak: "ลากตัวอักษรอังกฤษไปหาภาพที่ขึ้นต้นด้วยตัวนั้น" },
+      { id: "color", name: "ภาพกับสี", icon: "🎨", className: "cat-color", instruction: "ลากภาพไปหาสีที่ตรงกัน", speak: "ลากภาพไปหาสีที่ตรงกัน" }
+    ];
+
+    const sameItems = [
+      { key: "dog", icon: "🐶", label: "หมา", speak: "หมา" },
+      { key: "cat", icon: "🐱", label: "แมว", speak: "แมว" },
+      { key: "rabbit", icon: "🐰", label: "กระต่าย", speak: "กระต่าย" },
+      { key: "bear", icon: "🐻", label: "หมี", speak: "หมี" },
+      { key: "apple", icon: "🍎", label: "แอปเปิล", speak: "แอปเปิล" },
+      { key: "banana", icon: "🍌", label: "กล้วย", speak: "กล้วย" },
+      { key: "car", icon: "🚗", label: "รถ", speak: "รถ" },
+      { key: "ball", icon: "⚽", label: "ลูกบอล", speak: "ลูกบอล" },
+      { key: "star", icon: "⭐", label: "ดาว", speak: "ดาว" },
+      { key: "moon", icon: "🌙", label: "พระจันทร์", speak: "พระจันทร์" }
+    ];
+
+    const fruitItems = [
+      { key: "apple", icon: "🍎", label: "แอปเปิล", speak: "แอปเปิล" },
+      { key: "banana", icon: "🍌", label: "กล้วย", speak: "กล้วย" },
+      { key: "grape", icon: "🍇", label: "องุ่น", speak: "องุ่น" },
+      { key: "strawberry", icon: "🍓", label: "สตรอว์เบอร์รี", speak: "สตรอว์เบอร์รี" },
+      { key: "watermelon", icon: "🍉", label: "แตงโม", speak: "แตงโม" },
+      { key: "orange", icon: "🍊", label: "ส้ม", speak: "ส้ม" },
+      { key: "lemon", icon: "🍋", label: "มะนาว", speak: "มะนาว" },
+      { key: "pineapple", icon: "🍍", label: "สับปะรด", speak: "สับปะรด" }
+    ];
+
+    const thaiItems = [
+      { key: "ก", left: "ก", leftLabel: "ก ไก่", leftSpeak: "กอไก่", rightIcon: "🐔", rightLabel: "ไก่" },
+      { key: "ข", left: "ข", leftLabel: "ข ไข่", leftSpeak: "ขอไข่", rightIcon: "🥚", rightLabel: "ไข่" },
+      { key: "ค", left: "ค", leftLabel: "ค ควาย", leftSpeak: "คอควาย", rightIcon: "🐃", rightLabel: "ควาย" },
+      { key: "ง", left: "ง", leftLabel: "ง งู", leftSpeak: "งองู", rightIcon: "🐍", rightLabel: "งู" },
+      { key: "จ", left: "จ", leftLabel: "จ จาน", leftSpeak: "จอจาน", rightIcon: "🍽️", rightLabel: "จาน" },
+      { key: "ช", left: "ช", leftLabel: "ช ช้าง", leftSpeak: "ชอช้าง", rightIcon: "🐘", rightLabel: "ช้าง" },
+      { key: "ต", left: "ต", leftLabel: "ต เต่า", leftSpeak: "ตอเต่า", rightIcon: "🐢", rightLabel: "เต่า" },
+      { key: "ป", left: "ป", leftLabel: "ป ปลา", leftSpeak: "ปอปลา", rightIcon: "🐟", rightLabel: "ปลา" },
+      { key: "ผ", left: "ผ", leftLabel: "ผ ผึ้ง", leftSpeak: "ผอผึ้ง", rightIcon: "🐝", rightLabel: "ผึ้ง" },
+      { key: "ม", left: "ม", leftLabel: "ม ม้า", leftSpeak: "มอม้า", rightIcon: "🐴", rightLabel: "ม้า" },
+      { key: "ล", left: "ล", leftLabel: "ล ลิง", leftSpeak: "ลอลิง", rightIcon: "🐒", rightLabel: "ลิง" },
+      { key: "ฮ", left: "ฮ", leftLabel: "ฮ นกฮูก", leftSpeak: "ฮอนกฮูก", rightIcon: "🦉", rightLabel: "นกฮูก" }
+    ];
+
+    const numberItems = [
+      { key: "1", number: "1", speak: "เลขหนึ่ง", icon: "🍊", count: 1 },
+      { key: "2", number: "2", speak: "เลขสอง", icon: "🍊", count: 2 },
+      { key: "3", number: "3", speak: "เลขสาม", icon: "🍊", count: 3 },
+      { key: "4", number: "4", speak: "เลขสี่", icon: "🍊", count: 4 },
+      { key: "5", number: "5", speak: "เลขห้า", icon: "🍊", count: 5 },
+      { key: "6", number: "6", speak: "เลขหก", icon: "🍊", count: 6 },
+      { key: "7", number: "7", speak: "เลขเจ็ด", icon: "🍊", count: 7 },
+      { key: "8", number: "8", speak: "เลขแปด", icon: "🍊", count: 8 }
+    ];
+
+    const englishItems = [
+      { key: "A", letter: "A", word: "Ant", speak: "A Ant", icon: "🐜" },
+      { key: "B", letter: "B", word: "Bear", speak: "B Bear", icon: "🐻" },
+      { key: "C", letter: "C", word: "Cat", speak: "C Cat", icon: "🐱" },
+      { key: "D", letter: "D", word: "Dog", speak: "D Dog", icon: "🐶" },
+      { key: "E", letter: "E", word: "Elephant", speak: "E Elephant", icon: "🐘" },
+      { key: "F", letter: "F", word: "Fish", speak: "F Fish", icon: "🐟" },
+      { key: "G", letter: "G", word: "Grapes", speak: "G Grapes", icon: "🍇" },
+      { key: "H", letter: "H", word: "Horse", speak: "H Horse", icon: "🐴" },
+      { key: "L", letter: "L", word: "Lion", speak: "L Lion", icon: "🦁" },
+      { key: "M", letter: "M", word: "Monkey", speak: "M Monkey", icon: "🐵" }
+    ];
+
+    const colorItems = [
+      { key: "apple-red", icon: "🍎", label: "แอปเปิล", speak: "แอปเปิล สีแดง", colorName: "สีแดง", color: "#ff3b5f" },
+      { key: "banana-yellow", icon: "🍌", label: "กล้วย", speak: "กล้วย สีเหลือง", colorName: "สีเหลือง", color: "#ffc94a" },
+      { key: "grape-purple", icon: "🍇", label: "องุ่น", speak: "องุ่น สีม่วง", colorName: "สีม่วง", color: "#845ec2" },
+      { key: "orange-orange", icon: "🍊", label: "ส้ม", speak: "ส้ม สีส้ม", colorName: "สีส้ม", color: "#ff9f43" },
+      { key: "strawberry-red", icon: "🍓", label: "สตรอว์เบอร์รี", speak: "สตรอว์เบอร์รี สีแดง", colorName: "สีแดง", color: "#ff3b5f" },
+      { key: "leaf-green", icon: "🍃", label: "ใบไม้", speak: "ใบไม้ สีเขียว", colorName: "สีเขียว", color: "#44c767" },
+      { key: "water-blue", icon: "💧", label: "น้ำ", speak: "น้ำ สีฟ้า", colorName: "สีฟ้า", color: "#4db7ff" }
+    ];
+
+    const state = {
+      categoryId: "same",
+      roundPairs: [],
+      selectedLeft: null,
+      matchedKeys: new Set(),
+      tries: 0,
+      bestByCategory: {},
+      dragging: false,
+      tempLine: null,
+      dragStart: null
+    };
+
+    const categoryGrid = document.getElementById("categoryGrid");
+    const instruction = document.getElementById("instruction");
+    const leftColumn = document.getElementById("leftColumn");
+    const rightColumn = document.getElementById("rightColumn");
+    const gameArea = document.getElementById("gameArea");
+    const lineLayer = document.getElementById("lineLayer");
+    const feedback = document.getElementById("feedback");
+    const matchedText = document.getElementById("matchedText");
+    const tryText = document.getElementById("tryText");
+    const bestText = document.getElementById("bestText");
+    const listenBtn = document.getElementById("listenBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stars = document.getElementById("stars");
+
+    function getCategory() {
+      return categories.find(category => category.id === state.categoryId) || categories[0];
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function pickMany(array, count) {
+      return shuffle(array).slice(0, count);
+    }
+
+    function renderCategories() {
+      categoryGrid.innerHTML = "";
+      categories.forEach(category => {
+        const button = document.createElement("button");
+        button.className = `category-btn ${category.className} ${category.id === state.categoryId ? "active" : ""}`;
+        button.innerHTML = `<span class="icon">${category.icon}</span>${category.name}`;
+        button.addEventListener("click", () => {
+          state.categoryId = category.id;
+          renderCategories();
+          startNewRound();
+        });
+        categoryGrid.appendChild(button);
+      });
+    }
+
+    function createRoundPairs() {
+      if (state.categoryId === "same") {
+        return pickMany(sameItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.icon, label: item.label, small: "ลากไปหาภาพเดียวกัน", speak: item.speak },
+          right: { big: item.icon, label: item.label, small: "ภาพเดียวกัน" }
+        }));
+      }
+
+      if (state.categoryId === "fruit") {
+        return pickMany(fruitItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.icon, label: item.label, small: "ผลไม้", speak: item.speak },
+          right: { big: item.icon, label: item.label, small: "ผลไม้เดียวกัน" }
+        }));
+      }
+
+      if (state.categoryId === "thai") {
+        return pickMany(thaiItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.left, label: item.leftLabel, small: "ตัวอักษรไทย", speak: item.leftSpeak },
+          right: { big: item.rightIcon, label: item.rightLabel, small: item.leftLabel }
+        }));
+      }
+
+      if (state.categoryId === "number") {
+        return pickMany(numberItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.number, label: item.speak, small: "ตัวเลข", speak: item.speak },
+          right: { customBig: createCountHtml(item.icon, item.count), label: `${item.icon} ${item.count} ลูก`, small: `จำนวน ${item.count}` }
+        }));
+      }
+
+      if (state.categoryId === "english") {
+        return pickMany(englishItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.letter, label: `ตัว ${item.letter}`, small: "English letter", speak: item.speak },
+          right: { big: item.icon, label: item.word, small: item.speak }
+        }));
+      }
+
+      if (state.categoryId === "color") {
+        return pickMany(colorItems, PAIRS_PER_ROUND).map(item => ({
+          key: item.key,
+          left: { big: item.icon, label: item.label, small: "ลากไปหาสี", speak: item.speak },
+          right: { color: item.color, label: item.colorName, small: item.label }
+        }));
+      }
+
+      return [];
+    }
+
+    function createCountHtml(icon, count) {
+      return `<div class="count-row">${Array.from({ length: count }, () => icon).join("")}</div>`;
+    }
+
+    function startNewRound() {
+      stopSpeaking();
+      clearLines();
+      const category = getCategory();
+      state.roundPairs = createRoundPairs();
+      state.selectedLeft = null;
+      state.matchedKeys = new Set();
+      state.tries = 0;
+      state.dragging = false;
+      state.tempLine = null;
+      state.dragStart = null;
+
+      instruction.textContent = category.instruction;
+      feedback.textContent = "ลากจากฝั่งซ้ายไปหาคำตอบฝั่งขวา";
+      renderBoard();
+      updateScore();
+      setTimeout(() => speakText(category.speak), 450);
+    }
+
+    function renderBoard() {
+      leftColumn.innerHTML = "";
+      rightColumn.innerHTML = "";
+
+      const leftItems = shuffle(state.roundPairs);
+      const rightItems = shuffle(state.roundPairs);
+
+      leftItems.forEach(pair => {
+        const item = createItemElement(pair, "left");
+        leftColumn.appendChild(item);
+      });
+
+      rightItems.forEach(pair => {
+        const item = createItemElement(pair, "right");
+        rightColumn.appendChild(item);
+      });
+    }
+
+    function createItemElement(pair, side) {
+      const data = side === "left" ? pair.left : pair.right;
+      const element = document.createElement("button");
+      element.className = "match-item";
+      element.dataset.key = pair.key;
+      element.dataset.side = side;
+
+      const bigContent = data.customBig
+        ? data.customBig
+        : data.color
+          ? `<div class="color-box" style="background:${data.color}"></div>`
+          : data.big;
+
+      element.innerHTML = `
+        <div class="big">${bigContent}</div>
+        <div>
+          <div class="label">${data.label}</div>
+          <span class="small">${data.small || ""}</span>
+        </div>
+      `;
+
+      if (side === "left") {
+        element.addEventListener("pointerdown", event => startDrag(event, element, data.speak || data.label));
+      } else {
+        element.addEventListener("pointerup", event => endDrag(event, element));
+      }
+
+      element.addEventListener("click", event => handleClickFallback(event, element));
+      return element;
+    }
+
+    function handleClickFallback(event, element) {
+      if (state.dragging) return;
+      const side = element.dataset.side;
+
+      if (side === "left") {
+        if (element.classList.contains("done")) return;
+        clearSelectedLeft();
+        state.selectedLeft = element;
+        element.classList.add("selected");
+        const label = element.querySelector(".label")?.textContent || "";
+        feedback.textContent = "เลือกคำตอบฝั่งขวา";
+        speakText(label);
+        return;
+      }
+
+      if (side === "right" && state.selectedLeft) {
+        checkMatch(state.selectedLeft, element, event.clientX, event.clientY);
+      }
+    }
+
+    function startDrag(event, element, speak) {
+      if (element.classList.contains("done")) return;
+      event.preventDefault();
+      clearSelectedLeft();
+      state.selectedLeft = element;
+      element.classList.add("selected");
+      speakText(speak);
+
+      state.dragging = true;
+      state.dragStart = getCenterInGameArea(element);
+      state.tempLine = createSvgLine(state.dragStart.x, state.dragStart.y, state.dragStart.x, state.dragStart.y, "#6c63ff", true);
+      lineLayer.appendChild(state.tempLine);
+
+      window.addEventListener("pointermove", onDragMove);
+      window.addEventListener("pointerup", onDragEndAnywhere);
+    }
+
+    function onDragMove(event) {
+      if (!state.dragging || !state.tempLine) return;
+      const point = getPointInGameArea(event.clientX, event.clientY);
+      state.tempLine.setAttribute("x2", point.x);
+      state.tempLine.setAttribute("y2", point.y);
+    }
+
+    function onDragEndAnywhere(event) {
+      if (!state.dragging) return;
+      const target = document.elementFromPoint(event.clientX, event.clientY);
+      const rightItem = target ? target.closest('.match-item[data-side="right"]') : null;
+
+      if (rightItem) {
+        checkMatch(state.selectedLeft, rightItem, event.clientX, event.clientY);
+      } else {
+        removeTempLine();
+        feedback.textContent = "ลากไปปล่อยที่ฝั่งขวานะ";
+        playTrySound();
+      }
+
+      state.dragging = false;
+      window.removeEventListener("pointermove", onDragMove);
+      window.removeEventListener("pointerup", onDragEndAnywhere);
+    }
+
+    function endDrag(event, rightElement) {
+      if (!state.dragging || !state.selectedLeft) return;
+      checkMatch(state.selectedLeft, rightElement, event.clientX, event.clientY);
+    }
+
+    function checkMatch(leftElement, rightElement, clientX, clientY) {
+      if (!leftElement || !rightElement) return;
+      if (leftElement.classList.contains("done") || rightElement.classList.contains("done")) return;
+
+      state.tries += 1;
+      const isCorrect = leftElement.dataset.key === rightElement.dataset.key;
+
+      if (isCorrect) {
+        makePermanentLine(leftElement, rightElement);
+        leftElement.classList.add("done");
+        rightElement.classList.add("done");
+        state.matchedKeys.add(leftElement.dataset.key);
+        feedback.textContent = "ถูกต้อง เก่งมาก";
+        playGoodSound();
+        createStars(clientX, clientY);
+        speakText("ถูกต้อง เก่งมาก");
+      } else {
+        showWrong(leftElement, rightElement);
+        feedback.textContent = "ยังไม่ใช่คู่นี้ ลองอีกครั้ง";
+        playTrySound();
+        speakText("ลองอีกครั้ง");
+      }
+
+      removeTempLine();
+      clearSelectedLeft();
+      state.selectedLeft = null;
+      updateScore();
+
+      if (state.matchedKeys.size === PAIRS_PER_ROUND) {
+        finishRound();
+      }
+    }
+
+    function makePermanentLine(leftElement, rightElement) {
+      const start = getCenterInGameArea(leftElement);
+      const end = getCenterInGameArea(rightElement);
+      const line = createSvgLine(start.x, start.y, end.x, end.y, "#44c767", false);
+      lineLayer.appendChild(line);
+    }
+
+    function createSvgLine(x1, y1, x2, y2, color, dashed) {
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      line.setAttribute("x1", x1);
+      line.setAttribute("y1", y1);
+      line.setAttribute("x2", x2);
+      line.setAttribute("y2", y2);
+      line.setAttribute("stroke", color);
+      line.setAttribute("stroke-width", "12");
+      if (dashed) line.setAttribute("stroke-dasharray", "18 14");
+      return line;
+    }
+
+    function clearLines() {
+      lineLayer.innerHTML = "";
+    }
+
+    function removeTempLine() {
+      if (state.tempLine) {
+        state.tempLine.remove();
+        state.tempLine = null;
+      }
+    }
+
+    function clearSelectedLeft() {
+      document.querySelectorAll(".match-item.selected").forEach(item => item.classList.remove("selected"));
+    }
+
+    function showWrong(leftElement, rightElement) {
+      leftElement.classList.add("wrong");
+      rightElement.classList.add("wrong");
+      setTimeout(() => {
+        leftElement.classList.remove("wrong");
+        rightElement.classList.remove("wrong");
+      }, 450);
+    }
+
+    function finishRound() {
+      const category = getCategory();
+      const oldBest = state.bestByCategory[category.id];
+      const isNewBest = !oldBest || state.tries < oldBest;
+      if (isNewBest) state.bestByCategory[category.id] = state.tries;
+      updateScore();
+      feedback.textContent = isNewBest
+        ? `จบแล้ว เก่งมาก ทำสถิติใหม่ ${state.tries} ครั้ง`
+        : `จบแล้ว เก่งมาก ใช้ ${state.tries} ครั้ง`;
+      speakText("จบแล้ว เก่งมาก คลิกเริ่มใหม่เพื่อเล่นอีกครั้ง");
+    }
+
+    function updateScore() {
+      const category = getCategory();
+      matchedText.textContent = `${state.matchedKeys.size}/${PAIRS_PER_ROUND}`;
+      tryText.textContent = state.tries;
+      bestText.textContent = state.bestByCategory[category.id] || "-";
+    }
+
+    function getCenterInGameArea(element) {
+      const rect = element.getBoundingClientRect();
+      const areaRect = gameArea.getBoundingClientRect();
+      return {
+        x: rect.left + rect.width / 2 - areaRect.left,
+        y: rect.top + rect.height / 2 - areaRect.top
+      };
+    }
+
+    function getPointInGameArea(clientX, clientY) {
+      const areaRect = gameArea.getBoundingClientRect();
+      return {
+        x: clientX - areaRect.left,
+        y: clientY - areaRect.top
+      };
+    }
+
+    function stopSpeaking() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakText(text) {
+      if (!("speechSynthesis" in window)) {
+        feedback.textContent = "เบราว์เซอร์นี้ยังไม่รองรับเสียงอ่าน";
+        return;
+      }
+
+      stopSpeaking();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "th-TH";
+      utterance.rate = 0.68;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
+
+      const voices = window.speechSynthesis.getVoices();
+      const thaiVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+      if (thaiVoice) utterance.voice = thaiVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function createStars(x, y) {
+      for (let i = 0; i < 10; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = ["⭐", "✨", "🌟", "💛"][Math.floor(Math.random() * 4)];
+        star.style.left = `${x + Math.floor(Math.random() * 160 - 80)}px`;
+        star.style.top = `${y + Math.floor(Math.random() * 60 - 30)}px`;
+        star.style.animationDelay = `${i * 35}ms`;
+        stars.appendChild(star);
+        setTimeout(() => star.remove(), 1200);
+      }
+    }
+
+    function playTone(freq, duration, type = "sine") {
+      try {
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + duration);
+      } catch (error) {}
+    }
+
+    function playGoodSound() {
+      playTone(660, .12, "triangle");
+      setTimeout(() => playTone(880, .16, "triangle"), 120);
+    }
+
+    function playTrySound() {
+      playTone(240, .16, "sine");
+    }
+
+    listenBtn.addEventListener("click", () => speakText(getCategory().speak));
+    resetBtn.addEventListener("click", startNewRound);
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    renderCategories();
+    startNewRound();
+  </script>
+</body>
+</html>
