@@ -1,8 +1,31 @@
 # For Thai Kids
-Play here:
-- Learning: https://man2454.github.io/develop-kids/mj.html
-- Learning: https://man2454.github.io/develop-kids/matching-game.html
-- Learning: https://man2454.github.io/develop-kids/line-matching.html
+
+A small collection of simple browser-based learning games for young children.
+
+These games are designed to help kids practice:
+- Mouse clicking
+- Dragging and hand-eye coordination
+- Listening to instructions
+- Basic Thai letters
+- Basic English letters
+- Numbers and counting
+- Colors, shapes, fruits, animals, and visual matching
+
+## Play here
+
+- Click & Learn: https://man2454.github.io/develop-kids/mj.html
+- Picture Matching: https://man2454.github.io/develop-kids/matching-game.html
+- Line Matching: https://man2454.github.io/develop-kids/line-matching.html
+
+## Usage
+
+These learning games are free to play for personal, family, and classroom use.
+
+Commercial resale, redistribution, republishing, or claiming this project as your own is not allowed.
+
+Feedback and suggestions are welcome.
+
+---
 
 # 3 Lane Wave System (Prototype)
 
@@ -12,58 +35,54 @@ Play here:
 - Neo Dodge: https://man2454.github.io/develop-kids/dodge.html
 
 ## Why I made this
-I keep seeing a lot of ads that show “fun looking” lane / wave defense gameplay — but many of them don’t actually have a real playable game behind the ad.  
-So I made a simple playable version for myself. The graphics are intentionally super basic (just rectangles), because the goal was to get the core gameplay working first.
 
-If you want to fork this and make it prettier, add sound effects, polish the UI, or improve the visuals — I’d really appreciate it.
+I keep seeing a lot of ads that show “fun looking” lane / wave defense gameplay — but many of them do not actually have a real playable game behind the ad.
 
-## What this game is about (based on the code)
-This is a **wave-based lane defense shooter**:
+So I made a simple playable version for myself. The graphics are intentionally very basic because the goal was to get the core gameplay working first.
 
-- You control a **player unit** stationed on a **defense line** near the bottom of the screen.
-- **Enemies** spawn from the top and move downward toward your defense line.
-- The player **auto-shoots** upward. Your firepower is based on how many **Soldiers** you have.
-- If enemies reach the defense line, they **reduce your Soldiers** by their remaining HP.  
-  If your Soldiers drop to **0**, the game ends.
+## What this game is about
 
-### Core mechanics
-- **Waves**
-  - Each wave lasts **45 seconds**.
-  - Enemy count increases dramatically each wave (exponential growth).
-  - A performance cap limits enemies per wave, and the “extra” enemies are converted into **HP boost** so difficulty still scales.
+This is a wave-based lane defense shooter:
 
-- **Shooting / Power bullets**
-  - The player auto-fires every ~0.166s.
-  - Total damage per shot is basically your **Soldiers** value, split across multiple bullets.
-  - More Soldiers = more bullets / more total damage.
+- You control a player unit stationed on a defense line near the bottom of the screen.
+- Enemies spawn from the top and move downward toward your defense line.
+- The player auto-shoots upward.
+- Your firepower is based on how many Soldiers you have.
+- If enemies reach the defense line, they reduce your Soldiers by their remaining HP.
+- If your Soldiers drop to 0, the game ends.
 
-- **Mid-bosses**
-  - A mid-boss spawns at **13s** and another at **40s** in every wave.
-  - They have much higher HP and are slower, with visible HP bars.
+## Core mechanics
 
-- **Big boss**
-  - Every **3 waves**, a big boss can spawn after ~20s.
-  - Very high HP, very slow, and dangerous if it reaches the defense line.
-
-- **Pickups (Signs)**
-  - Green “+N” signs drop regularly.
-  - If you touch them, you gain **Soldiers** (your main resource).
-
-- **Rare target (Gold block)**
-  - A special “rare” block sits on the left lane area with its own HP.
-  - Destroying it increases the **sign value** (so future pickups give more Soldiers).
-  - After it dies, it respawns with higher HP each time.
+- Each wave lasts 45 seconds.
+- Enemy count increases each wave.
+- Mid-bosses spawn during each wave.
+- A big boss can spawn every 3 waves.
+- Green “+N” signs increase your Soldiers.
+- A rare gold block can increase future pickup value.
 
 ## Controls
-- Move: **Mouse / Touch** (move pointer left-right to position the player)
-- Start: **Start**
-- Pause / Resume: **Pause**
-- Restart: **Restart**
+
+- Move: Mouse / Touch
+- Start: Start
+- Pause / Resume: Pause
+- Restart: Restart
 
 ## Notes
-- This is a prototype focused on gameplay logic and wave stability.
-- Visuals are minimal by design. PRs for art, SFX, UI polish, and balancing are welcome.
+
+This is a prototype focused on gameplay logic and wave stability.
+
+Feedback and suggestions are welcome.
+
+---
 
 ## License
+
 Copyright © 2026 Treethawat Thanawachiramate
-This project is for personal and classroom use only. Commercial resale, redistribution, or republishing is prohibited.
+
+This project is provided for personal, family, and classroom use only.
+
+You may not:
+- Resell this project
+- Redistribute or republish this project
+- Claim this project as your own
+- Use this project or its source code for commercial purposes without permission
