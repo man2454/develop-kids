@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>เกมฝึกคลิกเม้าส์สำหรับเด็กอนุบาล</title>
+  <style>
+    :root {
+      --bg1: #fff7ad;
+      --bg2: #ffd1e8;
+      --bg3: #b9f3ff;
+      --card: rgba(255, 255, 255, 0.93);
+      --text: #3d315b;
+      --primary: #6c63ff;
+      --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
+    }
+
+    * { box-sizing: border-box; user-select: none; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,255,255,.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 90% 10%, rgba(255,255,255,.75) 0 6%, transparent 7%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(1180px, 96vw);
+      margin: 0 auto;
+      padding: 24px 0 34px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 22px;
+      margin-bottom: 18px;
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .title-area h1 {
+      margin: 0 0 6px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      color: #5b4bdb;
+      text-shadow: 2px 2px 0 #fff;
+    }
+
+    .title-area p {
+      margin: 0;
+      font-size: clamp(16px, 2vw, 22px);
+      color: #6d5f8f;
+    }
+
+    .mascot {
+      min-width: 110px;
+      height: 110px;
+      display: grid;
+      place-items: center;
+      font-size: 66px;
+      background: linear-gradient(160deg, #ffffff, #e8fbff);
+      border-radius: 32px;
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.04);
+      transform: rotate(4deg);
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 4px solid rgba(255,255,255,.85);
+      border-radius: 30px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .category-btn,
+    .action-btn,
+    .choice-card {
+      border: 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+    }
+
+    .category-btn:hover,
+    .action-btn:hover,
+    .choice-card:hover {
+      transform: translateY(-3px) scale(1.02);
+      filter: brightness(1.03);
+    }
+
+    .category-btn:active,
+    .action-btn:active,
+    .choice-card:active {
+      transform: translateY(1px) scale(.98);
+    }
+
+    .category-btn {
+      min-height: 96px;
+      padding: 12px 8px;
+      border-radius: 24px;
+      color: white;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.12), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .category-btn .icon {
+      display: block;
+      font-size: 34px;
+      margin-bottom: 4px;
+    }
+
+    .category-btn.active {
+      outline: 6px solid #fff;
+      transform: scale(1.04);
+    }
+
+    .cat-all { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .cat-time { background: linear-gradient(135deg, #ffb347, #ffcc33); }
+    .cat-size { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+    .cat-count { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .cat-color { background: linear-gradient(135deg, #ff5c7a, #ff9a9e); }
+    .cat-letter { background: linear-gradient(135deg, #845ec2, #d65db1); }
+    .cat-thai { background: linear-gradient(135deg, #ff9671, #ffc75f); }
+    .cat-shape { background: linear-gradient(135deg, #00b8a9, #72efdd); }
+
+    .score-box {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      height: 100%;
+    }
+
+    .score-item {
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 14px 8px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #fff, #f8fbff);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.05);
+    }
+
+    .score-item strong {
+      display: block;
+      font-size: clamp(28px, 3.4vw, 42px);
+      color: #5b4bdb;
+      line-height: 1;
+    }
+
+    .score-item span {
+      font-size: 16px;
+      color: #7b6c99;
+      font-weight: 900;
+    }
+
+    .game-panel {
+      min-height: 540px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+
+    .question-box {
+      text-align: center;
+      padding: 20px 16px;
+      border-radius: 26px;
+      background: linear-gradient(180deg, #ffffff, #fff6fb);
+      border: 3px dashed rgba(108, 99, 255, .35);
+    }
+
+    .question-label {
+      font-size: 18px;
+      color: #8a7aa8;
+      font-weight: 900;
+    }
+
+    .question {
+      margin: 8px 0 0;
+      font-size: clamp(30px, 4.5vw, 56px);
+      font-weight: 900;
+      color: #3d315b;
+      line-height: 1.12;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(260px, 1fr));
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .choice-card {
+      position: relative;
+      min-height: 310px;
+      padding: 18px;
+      border-radius: 34px;
+      background: #fff;
+      border: 7px solid #fff;
+      box-shadow: var(--shadow), inset 0 -10px 0 rgba(0,0,0,.05);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .choice-title {
+      width: max-content;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 8px 18px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: clamp(20px, 2.8vw, 34px);
+      font-weight: 900;
+      background: #6c63ff;
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.12);
+    }
+
+    .choice-visual {
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      font-size: clamp(74px, 10vw, 140px);
+      line-height: 1;
+    }
+
+    .choice-note {
+      min-height: 34px;
+      font-size: clamp(18px, 2.2vw, 26px);
+      font-weight: 900;
+      text-align: center;
+      color: #61517d;
+    }
+
+    .choice-card.correct { animation: correctPop .48s ease; border-color: #49d86b; }
+    .choice-card.wrong { animation: wrongShake .38s ease; border-color: #ff5c7a; }
+
+    @keyframes correctPop {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.07) rotate(1deg); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes wrongShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-12px); }
+      50% { transform: translateX(12px); }
+      75% { transform: translateX(-7px); }
+    }
+
+    .bottom-bar {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .feedback {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 24px;
+      background: #ffffff;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 900;
+      color: #5b4bdb;
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.04);
+    }
+
+    .action-btn {
+      min-width: 160px;
+      min-height: 72px;
+      border-radius: 24px;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.14), 0 8px 18px rgba(0,0,0,.12);
+    }
+
+    .listen-btn { background: linear-gradient(135deg, #6c63ff, #a66cff); }
+    .next-btn { background: linear-gradient(135deg, #44c767, #2fb344); }
+    .reset-btn { background: linear-gradient(135deg, #ff8a3d, #ff5c7a); }
+
+    .big-line, .short-line {
+      height: 22px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .big-line { width: 82%; }
+    .short-line { width: 42%; }
+
+    .items-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-content: center;
+      gap: 14px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .mini-item {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff, #f0fbff);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.06), 0 6px 12px rgba(0,0,0,.08);
+    }
+
+    .color-tile {
+      width: min(220px, 80%);
+      height: min(170px, 22vh);
+      border-radius: 36px;
+      box-shadow: inset 0 -14px 0 rgba(0,0,0,.12), 0 10px 22px rgba(0,0,0,.14);
+    }
+
+    .letter-card {
+      width: min(220px, 80%);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 38px;
+      background: linear-gradient(180deg, #fff, #f5f0ff);
+      border: 8px solid rgba(108, 99, 255, .2);
+      font-size: clamp(96px, 13vw, 170px);
+      font-weight: 900;
+      color: #5b4bdb;
+      box-shadow: inset 0 -12px 0 rgba(0,0,0,.05);
+    }
+
+    .shape {
+      width: min(190px, 70%);
+      aspect-ratio: 1;
+      background: #6c63ff;
+      box-shadow: inset 0 -13px 0 rgba(0,0,0,.12), 0 10px 22px rgba(0,0,0,.14);
+    }
+
+    .circle { border-radius: 50%; }
+    .square { border-radius: 22px; }
+    .rectangle { width: min(260px, 85%); height: 140px; border-radius: 24px; }
+    .oval { width: min(240px, 82%); height: 140px; border-radius: 50%; }
+    .diamond { transform: rotate(45deg); border-radius: 18px; }
+    .heart {
+      position: relative;
+      width: 150px;
+      height: 135px;
+      background: transparent;
+      box-shadow: none;
+    }
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 78px;
+      height: 120px;
+      background: #ff5c7a;
+      border-radius: 78px 78px 0 0;
+      top: 0;
+      box-shadow: inset 0 -10px 0 rgba(0,0,0,.10);
+    }
+    .heart::before {
+      left: 75px;
+      transform: rotate(-45deg);
+      transform-origin: 0 100%;
+    }
+    .heart::after {
+      left: 0;
+      transform: rotate(45deg);
+      transform-origin: 100% 100%;
+    }
+    .star-shape {
+      width: 180px;
+      height: 180px;
+      background: #ffc94a;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 92%, 50% 70%, 21% 92%, 32% 57%, 2% 35%, 39% 35%);
+    }
+    .cross-shape {
+      width: 180px;
+      height: 180px;
+      background: #845ec2;
+      clip-path: polygon(35% 0%, 65% 0%, 65% 35%, 100% 35%, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0% 65%, 0% 35%, 35% 35%);
+    }
+    .triangle {
+      width: 0;
+      height: 0;
+      background: transparent;
+      border-left: 105px solid transparent;
+      border-right: 105px solid transparent;
+      border-bottom: 190px solid #ff9f43;
+      box-shadow: none;
+    }
+
+    .day-bg { background: linear-gradient(180deg, #8ee9ff, #fff1a3); }
+    .night-bg { background: linear-gradient(180deg, #1d2b64, #4b3f95); color: white; }
+    .day-bg .choice-title { background: #ffb347; }
+    .night-bg .choice-title { background: #5144c4; }
+    .night-bg .choice-note { color: white; }
+
+    .stars {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .star {
+      position: absolute;
+      font-size: 34px;
+      animation: fly 900ms ease-out forwards;
+    }
+
+    @keyframes fly {
+      0% { transform: translateY(0) scale(.4) rotate(0); opacity: 1; }
+      100% { transform: translateY(-130px) scale(1.4) rotate(180deg); opacity: 0; }
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 15px;
+      color: rgba(61, 49, 91, .72);
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      header, .top-row, .bottom-bar { grid-template-columns: 1fr; }
+      header { text-align: center; justify-items: center; }
+      .category-grid { grid-template-columns: repeat(2, 1fr); }
+      .choices { grid-template-columns: 1fr; }
+      .choice-card { min-height: 240px; }
+      .score-box { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+
+  <main class="app">
+    <header>
+      <div class="title-area">
+        <h1>เกมฝึกคลิกเม้าส์</h1>
+        <p>หนึ่งชุดมี 7 ข้อ สุ่มจากคลังโจทย์หลังบ้านหมวดละ 50 ข้อ</p>
+      </div>
+      <div class="mascot" aria-hidden="true">🧸</div>
+    </header>
+
+    <section class="top-row">
+      <div class="panel">
+        <div class="category-grid" id="categoryGrid"></div>
+      </div>
+
+      <div class="panel score-box">
+        <div class="score-item"><div><strong id="roundNo">1/7</strong><span>ข้อในชุด</span></div></div>
+        <div class="score-item"><div><strong id="score">0</strong><span>ตอบถูก</span></div></div>
+        <div class="score-item"><div><strong id="total">0</strong><span>ทั้งหมด</span></div></div>
+        <div class="score-item"><div><strong id="streak">0</strong><span>ถูกติดกัน</span></div></div>
+      </div>
+    </section>
+
+    <section class="panel game-panel">
+      <div class="question-box">
+        <div class="question-label" id="modeLabel">หมวดรวม</div>
+        <div class="question" id="questionText">คลิกปุ่มเริ่มเล่นได้เลย</div>
+      </div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="bottom-bar">
+        <div class="feedback" id="feedback">พร้อมแล้ว มาเริ่มกันเลย</div>
+        <button class="action-btn listen-btn" id="listenBtn">ฟังโจทย์</button>
+        <button class="action-btn next-btn" id="nextBtn">ข้ามข้อนี้</button>
+        <button class="action-btn reset-btn" id="resetBtn">เริ่มชุดใหม่</button>
+      </div>
+    </section>
+
+    <div class="footer-note">เหมาะสำหรับใช้บน PC ด้วยเม้าส์ ปุ่มใหญ่ สีชัด และไม่มีข้อมูลออกนอกเครื่อง</div>
+  </main>
+
+  <script>
+    const ROUND_SIZE = 7;
+    const BACKUP_POOL_SIZE = 50;
+
+    const categoryList = [
+      { id: "all", name: "รวม", icon: "🎲", className: "cat-all" },
+      { id: "time", name: "กลางวัน/กลางคืน", icon: "☀️", className: "cat-time" },
+      { id: "size", name: "สั้น/ยาว", icon: "📏", className: "cat-size" },
+      { id: "count", name: "เยอะ/น้อย", icon: "🍎", className: "cat-count" },
+      { id: "color", name: "สี", icon: "🎨", className: "cat-color" },
+      { id: "letter", name: "A B C", icon: "🔤", className: "cat-letter" },
+      { id: "thai", name: "กอ ไก่", icon: "🐔", className: "cat-thai" },
+      { id: "shape", name: "รูปทรง", icon: "⭕", className: "cat-shape" }
+    ];
+
+    const state = {
+      category: "all",
+      score: 0,
+      total: 0,
+      streak: 0,
+      roundIndex: 0,
+      roundQuestions: [],
+      locked: false,
+      currentAnswer: null
+    };
+
+    const questionText = document.getElementById("questionText");
+    const modeLabel = document.getElementById("modeLabel");
+    const choices = document.getElementById("choices");
+    const feedback = document.getElementById("feedback");
+    const roundNoEl = document.getElementById("roundNo");
+    const scoreEl = document.getElementById("score");
+    const totalEl = document.getElementById("total");
+    const streakEl = document.getElementById("streak");
+    const listenBtn = document.getElementById("listenBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const categoryGrid = document.getElementById("categoryGrid");
+    const stars = document.getElementById("stars");
+
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
+
+    const colors = [
+      { name: "สีแดง", value: "#ff3b5f", answer: "red" },
+      { name: "สีฟ้า", value: "#4db7ff", answer: "blue" },
+      { name: "สีเหลือง", value: "#ffc94a", answer: "yellow" },
+      { name: "สีเขียว", value: "#44c767", answer: "green" },
+      { name: "สีม่วง", value: "#845ec2", answer: "purple" },
+      { name: "สีส้ม", value: "#ff9f43", answer: "orange" },
+      { name: "สีชมพู", value: "#ff8fd3", answer: "pink" },
+      { name: "สีน้ำตาล", value: "#9c6644", answer: "brown" }
+    ];
+
+    const englishLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const thaiLetters = [
+      { char: "ก", text: "ก ไก่", speak: "กอไก่", emoji: "🐔" },
+      { char: "ข", text: "ข ไข่", speak: "ขอไข่", emoji: "🥚" },
+      { char: "ฃ", text: "ฃ ขวด", speak: "ขอขวด", emoji: "🍾" },
+      { char: "ค", text: "ค ควาย", speak: "คอควาย", emoji: "🐃" },
+      { char: "ฅ", text: "ฅ คน", speak: "คอคน", emoji: "🧑" },
+      { char: "ฆ", text: "ฆ ระฆัง", speak: "คอ ระฆัง", emoji: "🔔" },
+      { char: "ง", text: "ง งู", speak: "งองู", emoji: "🐍" },
+      { char: "จ", text: "จ จาน", speak: "จอจาน", emoji: "🍽️" },
+      { char: "ฉ", text: "ฉ ฉิ่ง", speak: "ฉ.", emoji: "🎶" },
+      { char: "ช", text: "ช ช้าง", speak: "ชอช้าง", emoji: "🐘" },
+      { char: "ซ", text: "ซ โซ่", speak: "ซอโซ่", emoji: "⛓️" },
+      { char: "ฌ", text: "ฌ เฌอ", speak: "ชอเฌอ", emoji: "🌳" },
+      { char: "ญ", text: "ญ หญิง", speak: "ยอหญิง", emoji: "👧" },
+      { char: "ฎ", text: "ฎ ชฎา", speak: "ฎ ชะดา", emoji: "👑" },
+      { char: "ฏ", text: "ฏ ปฏัก", speak: "ต ปะตัก", emoji: "🏑" },
+      { char: "ฐ", text: "ฐ ฐาน", speak: "ถอฐาน", emoji: "🧱" },
+      { char: "ฑ", text: "ฑ มณโฑ", speak: "ฑ.", emoji: "👸" },
+      { char: "ฒ", text: "ฒ ผู้เฒ่า", speak: "ทอผู้เฒ่า", emoji: "👴" },
+      { char: "ณ", text: "ณ เณร", speak: "นอเณร", emoji: "🧒" },
+      { char: "ด", text: "ด เด็ก", speak: "ด.เด็ก", emoji: "🧒" },
+      { char: "ต", text: "ต เต่า", speak: "ตอเต่า", emoji: "🐢" },
+      { char: "ถ", text: "ถ ถุง", speak: "ถอถุง", emoji: "🛍️" },
+      { char: "ท", text: "ท ทหาร", speak: "ทอทหาร", emoji: "🎖️" },
+      { char: "ธ", text: "ธ ธง", speak: "ทอธง", emoji: "🚩" },
+      { char: "น", text: "น หนู", speak: "นอน หนู"", emoji: "🐭" },
+      { char: "บ", text: "บ ใบไม้", speak: "บอใบไม้", emoji: "🍃" },
+      { char: "ป", text: "ป ปลา", speak: "ปอ ปลา", emoji: "🐟" },
+      { char: "ผ", text: "ผ ผึ้ง", speak: "ผ ผึ้ง", emoji: "🐝" },
+      { char: "ฝ", text: "ฝ ฝา", speak: "ฝ ฝา", emoji: "🧢" },
+      { char: "พ", text: "พ พาน", speak: "พอพาน", emoji: "🏵️" },
+      { char: "ฟ", text: "ฟ ฟัน", speak: "ฟอฟัน", emoji: "🦷" },
+      { char: "ภ", text: "ภ สำเภา", speak: "พอสำเภา", emoji: "⛵" },
+      { char: "ม", text: "ม ม้า", speak: "มอมม้า", emoji: "🐴" },
+      { char: "ย", text: "ย ยักษ์", speak: "ย.ยัก", emoji: "👹" },
+      { char: "ร", text: "ร เรือ", speak: "ร.เรือ", emoji: "🚤" },
+      { char: "ล", text: "ล ลิง", speak: "ลอลิง", emoji: "🐒" },
+      { char: "ว", text: "ว แหวน", speak: "วอ. แหวน", emoji: "💍" },
+      { char: "ศ", text: "ศ ศาลา", speak: "สอศาลา", emoji: "🏛️" },
+      { char: "ษ", text: "ษ ฤาษี", speak: "ส.รือสี", emoji: "🧙" },
+      { char: "ส", text: "ส เสือ", speak: "สอเสือ", emoji: "🐯" },
+      { char: "ห", text: "ห หีบ", speak: "หอหีบ", emoji: "📦" },
+      { char: "ฬ", text: "ฬ จุฬา", speak: "ลอจุฬา", emoji: "🪁" },
+      { char: "อ", text: "อ อ่าง", speak: "อออ่าง", emoji: "🛁" },
+      { char: "ฮ", text: "ฮ นกฮูก", speak: "ฮอนกฮูก", emoji: "🦉" }
+    ];
+
+    const shapeList = [
+      { name: "วงกลม", answer: "circle", speak: "วงกลม", html: `<div class="shape circle" style="background:#ff5c7a"></div>` },
+      { name: "สี่เหลี่ยม", answer: "square", speak: "สี่เหลี่ยม", html: `<div class="shape square" style="background:#4db7ff"></div>` },
+      { name: "สามเหลี่ยม", answer: "triangle", speak: "สามเหลี่ยม", html: `<div class="shape triangle"></div>` },
+      { name: "วงรี", answer: "oval", speak: "วงรี", html: `<div class="shape oval" style="background:#44c767"></div>` },
+      { name: "ดาว", answer: "star", speak: "รูปดาว", html: `<div class="shape star-shape"></div>` },
+      { name: "หัวใจ", answer: "heart", speak: "รูปหัวใจ", html: `<div class="shape heart"></div>` },
+      { name: "เพชร", answer: "diamond", speak: "รูปเพชร", html: `<div class="shape diamond" style="background:#00b8a9"></div>` },
+      { name: "สี่เหลี่ยมผืนผ้า", answer: "rectangle", speak: "สี่เหลี่ยมผืนผ้า", html: `<div class="shape rectangle" style="background:#ff9f43"></div>` },
+      { name: "กากบาท", answer: "cross", speak: "รูปกากบาท", html: `<div class="shape cross-shape"></div>` }
+    ];
+
+    const itemList = ["🍎", "⭐", "🐟", "🚗", "🌸", "🧁", "🍌", "⚽", "🐻", "🎈"];
+
+    function renderCategories() {
+      categoryGrid.innerHTML = "";
+      categoryList.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = `category-btn ${cat.className} ${state.category === cat.id ? "active" : ""}`;
+        btn.innerHTML = `<span class="icon">${cat.icon}</span>${cat.name}`;
+        btn.onclick = () => {
+          state.category = cat.id;
+          renderCategories();
+          startNewRound();
+        };
+        categoryGrid.appendChild(btn);
+      });
+    }
+
+    function updateScore() {
+      roundNoEl.textContent = `${Math.min(state.roundIndex + 1, ROUND_SIZE)}/${ROUND_SIZE}`;
+      scoreEl.textContent = state.score;
+      totalEl.textContent = state.total;
+      streakEl.textContent = state.streak;
+    }
+
+    function setModeLabel() {
+      const cat = categoryList.find(c => c.id === state.category);
+      modeLabel.textContent = `หมวด${cat ? cat.name : "รวม"}`;
+    }
+
+    function choiceTemplate(choice, index) {
+      const card = document.createElement("button");
+      card.className = `choice-card ${choice.cardClass || ""}`;
+      card.dataset.answer = choice.answer;
+      card.innerHTML = `
+        <div class="choice-title" style="background:${choice.titleColor || "#6c63ff"}">${index === 0 ? "ฝั่งซ้าย" : "ฝั่งขวา"}</div>
+        <div class="choice-visual">${choice.visual}</div>
+        <div class="choice-note">${choice.note || ""}</div>
+      `;
+      card.onclick = (event) => checkAnswer(choice.answer, card, event);
+      return card;
+    }
+
+    function renderQuestion(q) {
+      state.locked = false;
+      state.currentAnswer = q.answer;
+      questionText.textContent = q.question;
+      feedback.textContent = "ลองคลิกคำตอบที่ใช่";
+      choices.innerHTML = "";
+      q.choices.forEach((choice, index) => choices.appendChild(choiceTemplate(choice, index)));
+      setModeLabel();
+      updateScore();
+      setTimeout(() => speakQuestion(q.speakText || q.question), 450);
+    }
+
+    function checkAnswer(answer, card, event) {
+      if (state.locked) return;
+      state.locked = true;
+      state.total += 1;
+
+      if (answer === state.currentAnswer) {
+        state.score += 1;
+        state.streak += 1;
+        card.classList.add("correct");
+        feedback.textContent = pick(["เก่งมาก ถูกต้อง", "เยี่ยมเลย", "ตอบถูกแล้ว", "สุดยอดมาก", "เก่งขึ้นอีกแล้ว"]);
+        playGoodSound();
+        createStars(event.clientX, event.clientY);
+      } else {
+        state.streak = 0;
+        card.classList.add("wrong");
+        feedback.textContent = "ยังไม่ใช่นะ ข้อถัดไปเอาใหม่นะ";
+        playTrySound();
+        [...choices.children].forEach(child => {
+          if (child.dataset.answer === state.currentAnswer) child.classList.add("correct");
+        });
+      }
+
+      updateScore();
+      setTimeout(goNextQuestion, 900);
+    }
+
+    function renderRoundComplete() {
+      stopSpeaking();
+      state.locked = true;
+      questionText.textContent = "จบชุดแล้ว เก่งมาก";
+      choices.innerHTML = `
+        <button class="choice-card" onclick="startNewRound()">
+          <div class="choice-title" style="background:#44c767">เล่นชุดใหม่</div>
+          <div class="choice-visual">🎉</div>
+          <div class="choice-note">คลิกเพื่อสุ่มโจทย์ใหม่ 7 ข้อ</div>
+        </button>
+        <button class="choice-card" onclick="resetAll()">
+          <div class="choice-title" style="background:#ff8a3d">ล้างคะแนน</div>
+          <div class="choice-visual">🔄</div>
+          <div class="choice-note">เริ่มนับคะแนนใหม่</div>
+        </button>
+      `;
+      feedback.textContent = `ชุดนี้ทำได้ ${state.score} คะแนน จาก ${state.total} ครั้ง`;
+      roundNoEl.textContent = `${ROUND_SIZE}/${ROUND_SIZE}`;
+      setTimeout(() => speakText("จบชุดแล้ว เก่งมาก คลิกเล่นชุดใหม่ได้เลย"), 450);
+    }
+
+    function goNextQuestion() {
+      state.roundIndex += 1;
+      if (state.roundIndex >= ROUND_SIZE) {
+        renderRoundComplete();
+        return;
+      }
+      renderQuestion(state.roundQuestions[state.roundIndex]);
+    }
+
+    function startNewRound() {
+      state.roundIndex = 0;
+      state.roundQuestions = getRoundQuestions(state.category);
+      renderQuestion(state.roundQuestions[0]);
+    }
+
+    function resetAll() {
+      state.score = 0;
+      state.total = 0;
+      state.streak = 0;
+      feedback.textContent = "เริ่มใหม่แล้ว สู้ต่อเลย";
+      startNewRound();
+    }
+
+    function getRoundQuestions(categoryId) {
+      if (categoryId === "all") {
+        const allQuestions = Object.values(questionPools).flat();
+        return shuffle(allQuestions).slice(0, ROUND_SIZE);
+      }
+      return shuffle(questionPools[categoryId]).slice(0, ROUND_SIZE);
+    }
+
+    function makeSideQuestion(question, answer, leftChoice, rightChoice, speakText = question) {
+      return {
+        question,
+        speakText,
+        answer,
+        choices: shuffle([leftChoice, rightChoice])
+      };
+    }
+
+    function makeTimePool() {
+      const pool = [];
+      const variants = [
+        { ask: "ฝั่งไหนคือกลางวัน", answer: "day" },
+        { ask: "ฝั่งไหนคือกลางคืน", answer: "night" },
+        { ask: "ฝั่งไหนมีพระอาทิตย์", answer: "day" },
+        { ask: "ฝั่งไหนมีพระจันทร์", answer: "night" },
+        { ask: "ฝั่งไหนสว่างกว่า", answer: "day" },
+        { ask: "ฝั่งไหนมืดกว่า", answer: "night" },
+        { ask: "ฝั่งไหนเหมาะกับการไปโรงเรียน", answer: "day" },
+        { ask: "ฝั่งไหนเหมาะกับการนอนหลับ", answer: "night" },
+        { ask: "ฝั่งไหนมีดาว", answer: "night" },
+        { ask: "ฝั่งไหนมีรุ้ง", answer: "day" }
+      ];
+      const dayVisuals = ["☀️🌈", "🌞🏫", "☀️🌻", "🌤️🐦", "🌞🏡"];
+      const nightVisuals = ["🌙⭐", "🌛🏠", "🌙✨", "🌌⭐", "🌜🛏️"];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const v = variants[i % variants.length];
+        pool.push(makeSideQuestion(v.ask, v.answer,
+          { answer: "day", cardClass: "day-bg", visual: dayVisuals[i % dayVisuals.length], note: "กลางวัน" },
+          { answer: "night", cardClass: "night-bg", visual: nightVisuals[i % nightVisuals.length], note: "กลางคืน" }
+        ));
+      }
+      return pool;
+    }
+
+    function makeSizePool() {
+      const pool = [];
+      const asks = [
+        { text: "อันไหนสั้นกว่า", answer: "short" },
+        { text: "อันไหนยาวกว่า", answer: "long" },
+        { text: "เลือกเส้นสั้น", answer: "short" },
+        { text: "เลือกเส้นยาว", answer: "long" },
+        { text: "อันไหนดูยาวกว่า", answer: "long" },
+        { text: "อันไหนดูสั้นกว่า", answer: "short" }
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const ask = asks[i % asks.length];
+        const longColor = colors[i % colors.length].value;
+        const shortColor = colors[(i + 3) % colors.length].value;
+        pool.push(makeSideQuestion(ask.text, ask.answer,
+          { answer: "long", visual: `<div class="big-line" style="color:${longColor}"></div>`, note: "เส้นยาว", titleColor: longColor },
+          { answer: "short", visual: `<div class="short-line" style="color:${shortColor}"></div>`, note: "เส้นสั้น", titleColor: shortColor }
+        ));
+      }
+      return pool;
+    }
+
+    function makeCountPool() {
+      const pool = [];
+      const asks = [
+        { text: "ฝั่งไหนเยอะกว่า", answer: "many" },
+        { text: "ฝั่งไหนน้อยกว่า", answer: "few" },
+        { text: "เลือกฝั่งที่มีของเยอะ", answer: "many" },
+        { text: "เลือกฝั่งที่มีของน้อย", answer: "few" },
+        { text: "ฝั่งไหนมีมากกว่า", answer: "many" },
+        { text: "ฝั่งไหนมีน้อยกว่า", answer: "few" }
+      ];
+      const makeItems = (count, item) => `<div class="items-row">${Array.from({ length: count }, () => `<div class="mini-item">${item}</div>`).join("")}</div>`;
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const item = itemList[i % itemList.length];
+        const few = 2 + (i % 3);
+        const many = 6 + (i % 4);
+        const ask = asks[i % asks.length];
+        pool.push(makeSideQuestion(ask.text, ask.answer,
+          { answer: "few", visual: makeItems(few, item), note: `${few} ชิ้น`, titleColor: "#ff9f43" },
+          { answer: "many", visual: makeItems(many, item), note: `${many} ชิ้น`, titleColor: "#44c767" }
+        ));
+      }
+      return pool;
+    }
+
+    function makeColorPool() {
+      const pool = [];
+      const questionForms = [
+        color => `ฝั่งไหน${color.name}`,
+        color => `เลือก${color.name}`,
+        color => `สีไหนคือ${color.name}`,
+        color => `กล่องไหนเป็น${color.name}`,
+        color => `คลิกฝั่งที่เป็น${color.name}`
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = colors[i % colors.length];
+        const other = colors[(i + 2 + (i % 3)) % colors.length];
+        const q = questionForms[i % questionForms.length](target);
+        pool.push(makeSideQuestion(q, target.answer,
+          { answer: target.answer, visual: `<div class="color-tile" style="background:${target.value}"></div>`, note: target.name, titleColor: target.value },
+          { answer: other.answer, visual: `<div class="color-tile" style="background:${other.value}"></div>`, note: other.name, titleColor: other.value }
+        ));
+      }
+      return pool;
+    }
+
+    function makeLetterPool() {
+      const pool = [];
+      const forms = [
+        l => `ฝั่งไหนตัว ${l}`,
+        l => `เลือกตัว ${l}`,
+        l => `ตัวอักษรไหนคือ ${l}`,
+        l => `คลิกตัว ${l}`,
+        l => `หาตัว ${l} ให้เจอ`
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = englishLetters[i % englishLetters.length];
+        const other = englishLetters[(i + 5 + (i % 7)) % englishLetters.length];
+        const q = forms[i % forms.length](target);
+        pool.push(makeSideQuestion(q, target,
+          { answer: target, visual: `<div class="letter-card">${target}</div>`, note: `ตัว ${target}`, titleColor: "#845ec2" },
+          { answer: other, visual: `<div class="letter-card">${other}</div>`, note: `ตัว ${other}`, titleColor: "#d65db1" }
+        ));
+      }
+      return pool;
+    }
+
+    function makeThaiPool() {
+      const pool = [];
+      const forms = [
+        {
+          display: l => `ฝั่งไหน ${l.text}`,
+          speak: l => `ฝั่งไหน คือ ตัวอักษร ${l.speak}`
+        },
+        {
+          display: l => `เลือก ${l.text}`,
+          speak: l => `เลือก ตัวอักษร ${l.speak}`
+        },
+        {
+          display: l => `ตัวไหนคือ ${l.text}`,
+          speak: l => `ตัวไหน คือ ตัวอักษร ${l.speak}`
+        },
+        {
+          display: l => `คลิก ${l.text}`,
+          speak: l => `คลิก ตัวอักษร ${l.speak}`
+        },
+        {
+          display: l => `หาตัว ${l.char} ให้เจอ`,
+          speak: l => `หา ตัวอักษร ${l.speak} ให้เจอ`
+        },
+        {
+          display: l => `ตัว ${l.char} อยู่ฝั่งไหน`,
+          speak: l => `ตัวอักษร ${l.speak} อยู่ฝั่งไหน`
+        },
+        {
+          display: l => `คลิกตัว ${l.char}`,
+          speak: l => `คลิก ตัวอักษร ${l.speak}`
+        }
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = thaiLetters[i % thaiLetters.length];
+        const other = thaiLetters[(i + 4 + (i % 5)) % thaiLetters.length];
+        const form = forms[i % forms.length];
+        const displayQuestion = form.display(target);
+        const spokenQuestion = form.speak(target);
+        pool.push(makeSideQuestion(displayQuestion, target.char,
+          { answer: target.char, visual: `<div class="letter-card">${target.char}</div>`, note: `${target.emoji} ${target.text}`, titleColor: "#ff9671" },
+          { answer: other.char, visual: `<div class="letter-card">${other.char}</div>`, note: `${other.emoji} ${other.text}`, titleColor: "#ffc75f" },
+          spokenQuestion
+        ));
+      }
+      return pool;
+    }
+
+    function makeShapePool() {
+      const pool = [];
+      const forms = [
+        s => `รูปไหน${s.name}`,
+        s => `เลือก${s.name}`,
+        s => `ฝั่งไหนเป็น${s.name}`,
+        s => `คลิกรูป${s.name}`,
+        s => `หาภาพ${s.name} ให้เจอ`
+      ];
+      for (let i = 0; i < BACKUP_POOL_SIZE; i++) {
+        const target = shapeList[i % shapeList.length];
+        const other = shapeList[(i + 1 + (i % 2)) % shapeList.length];
+        const q = forms[i % forms.length](target);
+        pool.push(makeSideQuestion(q, target.answer,
+          { answer: target.answer, visual: target.html, note: target.name, titleColor: "#00b8a9" },
+          { answer: other.answer, visual: other.html, note: other.name, titleColor: "#6c63ff" }
+        ));
+      }
+      return pool;
+    }
+
+    const questionPools = {
+      time: makeTimePool(),
+      size: makeSizePool(),
+      count: makeCountPool(),
+      color: makeColorPool(),
+      letter: makeLetterPool(),
+      thai: makeThaiPool(),
+      shape: makeShapePool()
+    };
+
+    function stopSpeaking() {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function speakText(text) {
+      if (!("speechSynthesis" in window)) {
+        feedback.textContent = "เบราว์เซอร์นี้ยังไม่รองรับเสียงอ่าน";
+        return;
+      }
+
+      stopSpeaking();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "th-TH";
+      utterance.rate = 0.68;
+      utterance.pitch = 1.08;
+      utterance.volume = 1;
+
+      const voices = window.speechSynthesis.getVoices();
+      const thaiVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("th"));
+      if (thaiVoice) utterance.voice = thaiVoice;
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function speakQuestion(text) {
+      speakText(text);
+    }
+
+    function createStars(x, y) {
+      for (let i = 0; i < 10; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.textContent = pick(["⭐", "✨", "🌟", "💛"]);
+        star.style.left = `${x + rand(-80, 80)}px`;
+        star.style.top = `${y + rand(-30, 30)}px`;
+        star.style.animationDelay = `${i * 35}ms`;
+        stars.appendChild(star);
+        setTimeout(() => star.remove(), 1200);
+      }
+    }
+
+    function playTone(freq, duration, type = "sine") {
+      try {
+        const audio = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audio.createOscillator();
+        const gain = audio.createGain();
+        oscillator.type = type;
+        oscillator.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, audio.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + duration);
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        oscillator.stop(audio.currentTime + duration);
+      } catch (error) {}
+    }
+
+    function playGoodSound() {
+      playTone(660, .12, "triangle");
+      setTimeout(() => playTone(880, .16, "triangle"), 120);
+    }
+
+    function playTrySound() {
+      playTone(240, .16, "sine");
+    }
+
+    listenBtn.addEventListener("click", () => {
+      const current = state.roundQuestions[state.roundIndex];
+      speakQuestion(current?.speakText || questionText.textContent);
+    });
+    nextBtn.addEventListener("click", goNextQuestion);
+    resetBtn.addEventListener("click", resetAll);
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+
+    renderCategories();
+    updateScore();
+    startNewRound();
+  </script>
+</body>
+</html>
