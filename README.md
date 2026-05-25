@@ -65,4 +65,5 @@ This is a **wave-based lane defense shooter**:
 - Visuals are minimal by design. PRs for art, SFX, UI polish, and balancing are welcome.
 
 ## License
-No formal license yet — feel free to fork and experiment. If you publish improvements, a link back is appreciated.
+Copyright © 2026 Treethawat Thanawachiramate
+This project is for personal and classroom use only. Commercial resale, redistribution, or republishing is prohibited.
