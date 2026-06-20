@@ -17,6 +17,7 @@ These games are designed to help kids practice:
 - Click & Learn: https://man2454.github.io/develop-kids/mj.html
 - Picture Matching: https://man2454.github.io/develop-kids/matching-game.html
 - Line Matching: https://man2454.github.io/develop-kids/line-matching.html
+- Typing: https://man2454.github.io/develop-kids/typing-rain.html
 
 ## Usage
 
