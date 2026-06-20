@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Typing Rain - For Thai Kids</title>
+  <style>
+    :root {
+      --bg1: #fff7ad;
+      --bg2: #ffd1e8;
+      --bg3: #b9f3ff;
+      --card: rgba(255, 255, 255, 0.94);
+      --text: #3d315b;
+      --purple: #6c63ff;
+      --pink: #ff5c7a;
+      --green: #44c767;
+      --orange: #ff9f43;
+      --blue: #4db7ff;
+      --red: #ff4d6d;
+      --shadow: 0 16px 35px rgba(68, 52, 126, 0.18);
+      --danger-line: 82%;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 15%, rgba(255,255,255,.95) 0 7%, transparent 8%),
+        radial-gradient(circle at 90% 10%, rgba(255,255,255,.75) 0 6%, transparent 7%),
+        radial-gradient(circle at 22% 82%, rgba(255,255,255,.65) 0 5%, transparent 6%),
+        linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, select { font-family: inherit; }
+
+    .app {
+      width: min(1180px, 96vw);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 18px 0 24px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .brand {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 8px 18px rgba(68,52,126,.12);
+      font-weight: 900;
+      color: #5b4bdb;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.86);
+      box-shadow: 0 8px 18px rgba(68,52,126,.12);
+      font-weight: 900;
+      color: #6d5f8f;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 26px;
+      border-radius: 34px;
+      background: var(--card);
+      border: 5px solid rgba(255,255,255,.88);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      right: -70px;
+      bottom: -90px;
+      background: radial-gradient(circle, rgba(108,99,255,.16), transparent 68%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 1.02;
+      color: #5b4bdb;
+      text-shadow: 3px 3px 0 #fff;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 780px;
+      font-size: clamp(18px, 2.2vw, 25px);
+      line-height: 1.35;
+      color: #6d5f8f;
+      font-weight: 900;
+    }
+
+    .mascot {
+      width: 150px;
+      height: 150px;
+      display: grid;
+      place-items: center;
+      font-size: 82px;
+      background: linear-gradient(160deg, #ffffff, #e8fbff);
+      border-radius: 42px;
+      box-shadow: inset 0 -10px 0 rgba(0,0,0,.04), 0 10px 24px rgba(0,0,0,.10);
+      transform: rotate(4deg);
+      z-index: 1;
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .setup-card {
+      padding: 18px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.86);
+      border: 4px solid rgba(255,255,255,.78);
+      box-shadow: 0 10px 24px rgba(68,52,126,.10), inset 0 -7px 0 rgba(0,0,0,.04);
+    }
+
+    .setup-card label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #4d416a;
+    }
+
+    .setup-card select {
+      width: 100%;
+      min-height: 56px;
+      padding: 0 14px;
+      border: 3px solid rgba(108,99,255,.20);
+      border-radius: 20px;
+      background: #fff;
+      color: #4d416a;
+      font-size: 18px;
+      font-weight: 900;
+      outline: none;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.04);
+    }
+
+    .hint-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.74);
+      color: #6d5f8f;
+      font-weight: 900;
+      line-height: 1.45;
+    }
+
+    .start-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .big-btn {
+      min-width: 210px;
+      min-height: 68px;
+      border: 0;
+      border-radius: 24px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 900;
+      cursor: pointer;
+      background: linear-gradient(135deg, #6c63ff, #a66cff);
+      box-shadow: inset 0 -7px 0 rgba(0,0,0,.14), 0 8px 18px rgba(0,0,0,.12);
+      transition: transform .12s ease, filter .12s ease;
+    }
+
+    .big-btn:hover { transform: translateY(-2px); filter: brightness(1.04); }
+    .big-btn.secondary { background: linear-gradient(135deg, #ff9f43, #ff5c7a); }
+    .big-btn.green { background: linear-gradient(135deg, #44c767, #00c2a8); }
+
+    .game-shell {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      min-height: calc(100vh - 90px);
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 12px;
+      border-radius: 28px;
+      background: rgba(255,255,255,.88);
+      border: 4px solid rgba(255,255,255,.78);
+      box-shadow: var(--shadow);
+    }
+
+    .hud-item {
+      display: grid;
+      gap: 2px;
+      justify-items: center;
+      padding: 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.76);
+      box-shadow: inset 0 -5px 0 rgba(0,0,0,.04);
+      font-weight: 900;
+    }
+
+    .hud-label {
+      font-size: 13px;
+      color: #7b6c99;
+    }
+
+    .hud-value {
+      font-size: clamp(20px, 2.5vw, 30px);
+      color: #4d416a;
+      line-height: 1.1;
+    }
+
+    .hearts {
+      letter-spacing: 2px;
+      white-space: nowrap;
+    }
+
+    .play-area {
+      position: relative;
+      height: min(680px, calc(100vh - 185px));
+      min-height: 470px;
+      border-radius: 34px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,.70), transparent 18%),
+        radial-gradient(circle at 82% 24%, rgba(255,255,255,.56), transparent 16%),
+        linear-gradient(180deg, rgba(255,255,255,.88), rgba(232,251,255,.92));
+      border: 6px solid rgba(255,255,255,.88);
+      box-shadow: var(--shadow), inset 0 -12px 0 rgba(0,0,0,.04);
+    }
+
+    .danger-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--danger-line);
+      height: 6px;
+      background: repeating-linear-gradient(90deg, #ff5c7a, #ff5c7a 18px, #fff 18px, #fff 30px);
+      box-shadow: 0 0 0 5px rgba(255,92,122,.12), 0 0 24px rgba(255,92,122,.25);
+      z-index: 2;
+    }
+
+    .danger-label {
+      position: absolute;
+      right: 14px;
+      top: calc(var(--danger-line) + 12px);
+      z-index: 3;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #fff;
+      color: #ff5c7a;
+      font-size: 14px;
+      font-weight: 900;
+      box-shadow: 0 5px 12px rgba(0,0,0,.09);
+    }
+
+    .falling-letter {
+      position: absolute;
+      top: -82px;
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #ffffff, #f3f8ff);
+      box-shadow: inset 0 -8px 0 rgba(0,0,0,.06), 0 10px 18px rgba(68,52,126,.16);
+      border: 4px solid rgba(255,255,255,.88);
+      color: #5b4bdb;
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+      z-index: 4;
+      user-select: none;
+      animation-name: fall;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fall {
+      from { top: -88px; transform: rotate(-2deg); }
+      to { top: calc(var(--danger-line) - 35px); transform: rotate(3deg); }
+    }
+
+    .letter-pop {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      pointer-events: none;
+      display: grid;
+      place-items: center;
+      z-index: 7;
+      animation: popOut .55s ease forwards;
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    @keyframes popOut {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(.4) rotate(0deg); }
+      55% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(8deg); }
+      100% { opacity: 0; transform: translate(-50%, -70%) scale(1.8) rotate(-12deg); }
+    }
+
+    .combo-banner {
+      position: absolute;
+      left: 50%;
+      top: 35%;
+      transform: translate(-50%, -50%);
+      z-index: 8;
+      padding: 16px 24px;
+      border-radius: 26px;
+      background: rgba(255,255,255,.93);
+      color: #5b4bdb;
+      font-size: clamp(28px, 5vw, 54px);
+      font-weight: 900;
+      box-shadow: var(--shadow);
+      animation: comboFly .9s ease forwards;
+      pointer-events: none;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    @keyframes comboFly {
+      0% { opacity: 0; transform: translate(-50%, -25%) scale(.7); }
+      20% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+      100% { opacity: 0; transform: translate(-50%, -92%) scale(.96); }
+    }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      z-index: 9;
+      max-width: min(680px, 92%);
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.94);
+      color: #6d5f8f;
+      font-weight: 900;
+      text-align: center;
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transition: opacity .2s ease, bottom .2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; bottom: 34px; }
+
+    .shake { animation: shake .45s ease; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    .heart-break {
+      position: absolute;
+      z-index: 10;
+      font-size: 56px;
+      animation: heartBreak .8s ease forwards;
+      pointer-events: none;
+    }
+
+    @keyframes heartBreak {
+      0% { opacity: 1; transform: scale(.5) rotate(0); }
+      35% { opacity: 1; transform: scale(1.35) rotate(-12deg); }
+      100% { opacity: 0; transform: translateY(-90px) scale(.8) rotate(28deg); }
+    }
+
+    .result-card {
+      max-width: 820px;
+      margin: 24px auto 0;
+      padding: 26px;
+      border-radius: 34px;
+      background: var(--card);
+      border: 5px solid rgba(255,255,255,.88);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+
+    .result-card h1 {
+      margin: 0 0 10px;
+      font-size: clamp(42px, 6vw, 68px);
+      color: #5b4bdb;
+      text-shadow: 3px 3px 0 #fff;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 18px 0;
+    }
+
+    .result-stat {
+      padding: 16px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.82);
+      box-shadow: inset 0 -6px 0 rgba(0,0,0,.04);
+      font-weight: 900;
+    }
+
+    .result-stat span {
+      display: block;
+      margin-bottom: 5px;
+      color: #7b6c99;
+      font-size: 14px;
+    }
+
+    .result-stat strong {
+      color: #4d416a;
+      font-size: 30px;
+    }
+
+    .grade {
+      margin: 12px auto 4px;
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: #fff;
+      color: #5b4bdb;
+      font-size: 24px;
+      font-weight: 900;
+      box-shadow: 0 8px 18px rgba(68,52,126,.12);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(61,49,91,.38);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.show { display: flex; }
+
+    .modal-card {
+      width: min(560px, 94vw);
+      padding: 24px;
+      border-radius: 34px;
+      background: #fff;
+      box-shadow: var(--shadow);
+      border: 5px solid rgba(255,255,255,.9);
+      text-align: center;
+    }
+
+    .modal-card h2 {
+      margin: 0 0 10px;
+      color: #5b4bdb;
+      font-size: 34px;
+    }
+
+    .modal-card p {
+      margin: 0 0 18px;
+      color: #6d5f8f;
+      font-size: 20px;
+      line-height: 1.45;
+      font-weight: 900;
+    }
+
+    footer {
+      margin-top: 14px;
+      padding: 12px;
+      text-align: center;
+      color: rgba(61, 49, 91, .72);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      .hero, .setup-grid { grid-template-columns: 1fr; }
+      .hero { text-align: center; justify-items: center; }
+      .hud { grid-template-columns: repeat(2, 1fr); }
+      .hud .hud-item:last-child { grid-column: 1 / -1; }
+      .play-area { height: calc(100vh - 250px); min-height: 420px; }
+      .result-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .app { width: min(94vw, 560px); padding-top: 12px; }
+      .topbar { align-items: stretch; flex-direction: column; }
+      .hero, .setup-card, .result-card { border-radius: 26px; }
+      .mascot { width: 118px; height: 118px; font-size: 68px; }
+      .falling-letter { width: 64px; height: 64px; border-radius: 20px; font-size: 34px; }
+      .hud { grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+      .hud-item { padding: 8px; }
+      .result-grid { grid-template-columns: 1fr; }
+      .big-btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <a class="brand" href="index.html">⌨️ Typing Rain</a>
+      <a class="back-link" href="index.html">← กลับหน้าเกม</a>
+    </div>
+
+    <section id="setupScreen" class="screen active">
+      <div class="hero">
+        <div>
+          <h1>Typing Rain</h1>
+          <p>ตัวอักษรจะค่อย ๆ ตกลงมา กดปุ่มให้ถูกก่อนถึงเส้นด้านล่าง ฝึกพิมพ์ภาษาอังกฤษ ตัวเลข และภาษาไทยแบบสนุก ๆ</p>
+        </div>
+        <div class="mascot" aria-hidden="true">🌧️</div>
+      </div>
+
+      <div class="setup-grid">
+        <div class="setup-card">
+          <label for="languageSelect">🌏 ภาษา</label>
+          <select id="languageSelect">
+            <option value="en" selected>English + Number</option>
+            <option value="th">ภาษาไทย</option>
+          </select>
+        </div>
+
+        <div class="setup-card">
+          <label for="gameModeSelect">🎯 โหมดเกม</label>
+          <select id="gameModeSelect">
+            <option value="goal" selected>Goal Mode - 50 คะแนนชนะ</option>
+            <option value="endless">Endless Mode - เก็บ High Score</option>
+          </select>
+        </div>
+
+        <div class="setup-card">
+          <label for="difficultySelect">🎚️ ความยาก</label>
+          <select id="difficultySelect">
+            <option value="1" selected>Beginner - 1 ตัว</option>
+            <option value="2">Easy - 2 ตัว</option>
+            <option value="4">Medium - 4 ตัว</option>
+            <option value="7">Hard - 7 ตัว</option>
+            <option value="10">Expert - 10 ตัว</option>
+          </select>
+        </div>
+
+        <div class="setup-card">
+          <label for="speedSelect">⚡ ความเร็ว</label>
+          <select id="speedSelect">
+            <option value="easy" selected>Easy - ตกใน 10 วินาที</option>
+            <option value="medium">Medium - ตกใน 5 วินาที</option>
+            <option value="master">Master - ตกใน 2 วินาที</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hint-box" id="setupHint">
+        ✅ ค่าเริ่มต้นคือ English + Number, Beginner, Speed Easy เหมาะสำหรับเริ่มเล่นง่ายที่สุด
+      </div>
+
+      <div class="start-row">
+        <button class="big-btn green" id="startBtn">▶️ Start Game</button>
+      </div>
+
+      <footer>© 2026 Treethawat Thanawachiramate. Free for personal, family, and classroom use only.</footer>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <div class="game-shell">
+        <div class="hud" id="hud">
+          <div class="hud-item">
+            <div class="hud-label">Score</div>
+            <div class="hud-value" id="scoreText">0</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-label">Goal</div>
+            <div class="hud-value" id="goalText">50</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-label">Combo</div>
+            <div class="hud-value" id="comboText">0</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-label">Wrong</div>
+            <div class="hud-value" id="accuracyText">0</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-label">Hearts</div>
+            <div class="hud-value hearts" id="heartsText">❤️❤️❤️❤️❤️</div>
+          </div>
+        </div>
+
+        <div class="play-area" id="playArea" tabindex="0" aria-label="Typing Rain game area">
+          <div class="danger-line"></div>
+          <div class="danger-label">อย่าให้ถึงเส้นนี้!</div>
+          <div class="toast" id="toast"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="result-card">
+        <h1 id="resultTitle">🏆 YOU WIN!</h1>
+        <div class="grade" id="resultGrade">🌟 Excellent!</div>
+        <div class="result-grid">
+          <div class="result-stat"><span>Score</span><strong id="resultScore">0</strong></div>
+          <div class="result-stat"><span>Correct</span><strong id="resultCorrect">0</strong></div>
+          <div class="result-stat"><span>Missed</span><strong id="resultMissed">0</strong></div><div class="result-stat"><span>Wrong</span><strong id="resultWrong">0</strong></div>
+          <div class="result-stat"><span>Accuracy</span><strong id="resultAccuracy">0%</strong></div>
+          <div class="result-stat"><span>Best Combo</span><strong id="resultCombo">0</strong></div>
+          <div class="result-stat"><span>Time</span><strong id="resultTime">0s</strong></div>
+        </div>
+        <div class="hint-box" id="bestStatsText"></div>
+        <div class="start-row">
+          <button class="big-btn green" id="playAgainBtn">🔁 เล่นอีกครั้ง</button>
+          <button class="big-btn secondary" id="menuBtn">🏠 กลับเมนู</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="thaiModal">
+    <div class="modal-card">
+      <h2>⚠️ โหมดภาษาไทย</h2>
+      <p>กรุณาเปลี่ยนแป้นพิมพ์เป็นภาษาไทยก่อนเริ่มเล่น<br />เกมจะตรวจจากตัวอักษรที่พิมพ์จริง ไม่แปลงปุ่มให้อัตโนมัติ</p>
+      <button class="big-btn green" id="confirmThaiBtn">เข้าใจแล้ว เริ่มเล่น</button>
+    </div>
+  </div>
+
+  <script>
+    const setupScreen = document.getElementById('setupScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const resultScreen = document.getElementById('resultScreen');
+    const playArea = document.getElementById('playArea');
+    const toast = document.getElementById('toast');
+
+    const languageSelect = document.getElementById('languageSelect');
+    const gameModeSelect = document.getElementById('gameModeSelect');
+    const difficultySelect = document.getElementById('difficultySelect');
+    const speedSelect = document.getElementById('speedSelect');
+    const setupHint = document.getElementById('setupHint');
+
+    const startBtn = document.getElementById('startBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const menuBtn = document.getElementById('menuBtn');
+    const thaiModal = document.getElementById('thaiModal');
+    const confirmThaiBtn = document.getElementById('confirmThaiBtn');
+
+    const scoreText = document.getElementById('scoreText');
+    const goalText = document.getElementById('goalText');
+    const comboText = document.getElementById('comboText');
+    const accuracyText = document.getElementById('accuracyText');
+    const heartsText = document.getElementById('heartsText');
+
+    const resultTitle = document.getElementById('resultTitle');
+    const resultGrade = document.getElementById('resultGrade');
+    const resultScore = document.getElementById('resultScore');
+    const resultCorrect = document.getElementById('resultCorrect');
+    const resultMissed = document.getElementById('resultMissed');
+    const resultWrong = document.getElementById('resultWrong');
+    const resultAccuracy = document.getElementById('resultAccuracy');
+    const resultCombo = document.getElementById('resultCombo');
+    const resultTime = document.getElementById('resultTime');
+    const bestStatsText = document.getElementById('bestStatsText');
+
+    const EN_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
+    const TH_CHARS = [
+      'ก','ข','ฃ','ค','ฅ','ฆ','ง','จ','ฉ','ช','ซ','ฌ','ญ','ฎ','ฏ','ฐ','ฑ','ฒ','ณ','ด','ต','ถ','ท','ธ','น','บ','ป','ผ','ฝ','พ','ฟ','ภ','ม','ย','ร','ฤ','ล','ฦ','ว','ศ','ษ','ส','ห','ฬ','อ','ฮ',
+      'ะ','ั','า','ำ','ิ','ี','ึ','ื','ุ','ู','เ','แ','โ','ใ','ไ','ๅ','ๆ','็','่','้','๊','๋','์','ํ','ฯ'
+    ];
+
+    const SPEEDS = {
+      easy: 10000,
+      medium: 5000,
+      master: 2000
+    };
+
+    let state;
+    let audioCtx;
+    let spawnTimer = null;
+    let toastTimer = null;
+    let lastColumn = -10;
+
+    function showScreen(screen) {
+      [setupScreen, gameScreen, resultScreen].forEach(s => s.classList.remove('active'));
+      screen.classList.add('active');
+    }
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function beep(type) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'hit') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(660, now);
+        osc.frequency.exponentialRampToValueAtTime(980, now + 0.08);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.14, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'break') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.18);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+        osc.start(now);
+        osc.stop(now + 0.24);
+      } else if (type === 'combo') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(760, now);
+        osc.frequency.exponentialRampToValueAtTime(1260, now + 0.16);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.13, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    }
+
+    function getChars() {
+      return languageSelect.value === 'th' ? TH_CHARS : EN_CHARS;
+    }
+
+    function getFallDuration() {
+      let base = SPEEDS[state.speed];
+      if (state.mode === 'endless') {
+        const upgrades = Math.floor(state.correct / 20);
+        base = base * Math.pow(0.9, upgrades);
+      }
+      return Math.max(900, base);
+    }
+
+    function getSpawnInterval() {
+      return getFallDuration() / state.maxLetters;
+    }
+
+    function randomChar() {
+      const chars = getChars();
+      return chars[Math.floor(Math.random() * chars.length)];
+    }
+
+    function updateHint() {
+      if (languageSelect.value === 'th') {
+        setupHint.innerHTML = '⚠️ โหมดภาษาไทย: กรุณาเปลี่ยนแป้นพิมพ์เป็นภาษาไทยก่อนเล่น เกมจะตรวจจากตัวอักษรที่พิมพ์จริง';
+      } else {
+        setupHint.innerHTML = '✅ ค่าเริ่มต้นคือ English + Number, Beginner, Speed Easy เหมาะสำหรับเริ่มเล่นง่ายที่สุด';
+      }
+    }
+
+    function resetState() {
+      lastColumn = -10;
+      state = {
+        language: languageSelect.value,
+        mode: gameModeSelect.value,
+        maxLetters: Number(difficultySelect.value),
+        speed: speedSelect.value,
+        score: 0,
+        correct: 0,
+        missed: 0,
+        hearts: 5,
+        combo: 0,
+        bestCombo: 0,
+        wrongStreak: 0,
+        wrongKeys: 0,
+        active: true,
+        letters: new Map(),
+        startTime: Date.now()
+      };
+    }
+
+    function startGame() {
+      initAudio();
+      resetState();
+      showScreen(gameScreen);
+      clearPlayArea();
+      updateHud();
+      goalText.textContent = state.mode === 'goal' ? '50' : '∞';
+      playArea.focus();
+      spawnLetter();
+      scheduleSpawn();
+    }
+
+    function requestStart() {
+      if (languageSelect.value === 'th') {
+        thaiModal.classList.add('show');
+      } else {
+        startGame();
+      }
+    }
+
+    function clearPlayArea() {
+      [...playArea.querySelectorAll('.falling-letter, .letter-pop, .combo-banner, .heart-break')].forEach(el => el.remove());
+      state?.letters?.clear?.();
+    }
+
+    function scheduleSpawn() {
+      clearTimeout(spawnTimer);
+      if (!state.active) return;
+      spawnTimer = setTimeout(() => {
+        spawnLetter();
+        scheduleSpawn();
+      }, getSpawnInterval());
+    }
+
+    function spawnOneIfEmpty() {
+      if (!state.active) return;
+      if (state.letters.size === 0) {
+        spawnLetter();
+        clearTimeout(spawnTimer);
+        scheduleSpawn();
+      }
+    }
+
+    function spawnLetter() {
+      if (!state.active) return;
+      if (state.letters.size >= state.maxLetters) return;
+
+      const el = document.createElement('div');
+      const char = randomChar();
+      const id = crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+      const duration = getFallDuration();
+      const areaWidth = playArea.clientWidth;
+      const size = window.innerWidth <= 560 ? 64 : 78;
+      const columns = 8;
+      let column;
+      do {
+        column = Math.floor(Math.random() * columns);
+      } while (Math.abs(column - lastColumn) < 2 && columns > 2);
+      lastColumn = column;
+      const left = 8 + (column * ((areaWidth - size - 16) / (columns - 1)));
+
+      el.className = 'falling-letter';
+      el.textContent = char;
+      el.dataset.char = char;
+      el.dataset.id = id;
+      el.style.left = left + 'px';
+      el.style.animationDuration = duration + 'ms';
+      el.style.background = randomLetterBg();
+      playArea.appendChild(el);
+
+      state.letters.set(id, { id, char, el });
+
+      el.addEventListener('animationend', () => {
+        if (!state.active || !state.letters.has(id)) return;
+        missLetter(id);
+      }, { once: true });
+    }
+
+    function randomLetterBg() {
+      const bgs = [
+        'linear-gradient(180deg, #ffffff, #f3f8ff)',
+        'linear-gradient(180deg, #ffffff, #fff0f6)',
+        'linear-gradient(180deg, #ffffff, #edfff5)',
+        'linear-gradient(180deg, #ffffff, #fff6dc)'
+      ];
+      return bgs[Math.floor(Math.random() * bgs.length)];
+    }
+
+    function handleKeydown(e) {
+      if (!state || !state.active) return;
+      if (e.key === 'Escape') {
+        endGame(false);
+        return;
+      }
+      if (e.key.length > 1) return;
+
+      const pressed = state.language === 'en' ? e.key.toUpperCase() : e.key;
+      const match = findBestMatch(pressed);
+      if (match) {
+        hitLetter(match.id);
+      } else {
+        state.combo = 0;
+        state.wrongStreak += 1;
+        state.wrongKeys += 1;
+
+        playArea.classList.remove('shake');
+        void playArea.offsetWidth;
+        playArea.classList.add('shake');
+
+        updateHud();
+        if (state.language === 'th' && state.wrongStreak >= 5) {
+          showToast('💡 ถ้ากดไม่ติด ลองตรวจสอบว่าแป้นพิมพ์อยู่ในภาษาไทยหรือยัง');
+          state.wrongStreak = 0;
+        }
+      }
+    }
+
+    function findBestMatch(pressed) {
+      let best = null;
+      let bestTop = -9999;
+      for (const item of state.letters.values()) {
+        if (item.char === pressed) {
+          const top = item.el.getBoundingClientRect().top;
+          if (top > bestTop) {
+            best = item;
+            bestTop = top;
+          }
+        }
+      }
+      return best;
+    }
+
+    function hitLetter(id) {
+      const item = state.letters.get(id);
+      if (!item) return;
+      state.letters.delete(id);
+      const rect = item.el.getBoundingClientRect();
+      const areaRect = playArea.getBoundingClientRect();
+      createExplosion(rect.left - areaRect.left + rect.width / 2, rect.top - areaRect.top + rect.height / 2);
+      item.el.remove();
+
+      state.score += 1;
+      state.correct += 1;
+      state.combo += 1;
+      state.bestCombo = Math.max(state.bestCombo, state.combo);
+      state.wrongStreak = 0;
+      beep('hit');
+
+      if ([5, 10, 20, 50].includes(state.combo)) {
+        showCombo(state.combo);
+        beep('combo');
+      }
+
+      updateHud();
+
+      if (state.mode === 'goal' && state.score >= 50) {
+        endGame(true);
+        return;
+      }
+
+      spawnOneIfEmpty();
+
+    }
+
+    function missLetter(id) {
+      const item = state.letters.get(id);
+      if (!item) return;
+      state.letters.delete(id);
+      const rect = item.el.getBoundingClientRect();
+      const areaRect = playArea.getBoundingClientRect();
+      createMissPop(rect.left - areaRect.left + rect.width / 2, rect.top - areaRect.top + rect.height / 2);
+      item.el.remove();
+
+      state.missed += 1;
+      state.hearts -= 1;
+      state.combo = 0;
+      state.wrongStreak = 0;
+      beep('break');
+      heartBreakEffect();
+      updateHud();
+
+      if (state.hearts <= 0) {
+        endGame(false);
+        return;
+      }
+
+      spawnOneIfEmpty();
+
+    }
+
+    function createExplosion(x, y) {
+      const pop = document.createElement('div');
+      pop.className = 'letter-pop';
+      pop.style.left = x + 'px';
+      pop.style.top = y + 'px';
+      pop.textContent = '✨⭐💥⭐✨';
+      playArea.appendChild(pop);
+      setTimeout(() => pop.remove(), 650);
+    }
+
+    function createMissPop(x, y) {
+      const pop = document.createElement('div');
+      pop.className = 'letter-pop';
+      pop.style.left = x + 'px';
+      pop.style.top = y + 'px';
+      pop.textContent = '💨';
+      playArea.appendChild(pop);
+      setTimeout(() => pop.remove(), 650);
+    }
+
+    function showCombo(combo) {
+      const banner = document.createElement('div');
+      banner.className = 'combo-banner';
+      if (combo >= 50) banner.textContent = '👑 TYPING MASTER!';
+      else if (combo >= 20) banner.textContent = '🏆 SUPER KID!';
+      else if (combo >= 10) banner.textContent = '🌟 AMAZING!';
+      else banner.textContent = '⭐ GREAT!';
+      playArea.appendChild(banner);
+      setTimeout(() => banner.remove(), 950);
+    }
+
+    function heartBreakEffect() {
+      const heart = document.createElement('div');
+      heart.className = 'heart-break';
+      heart.textContent = '💔';
+      heart.style.right = '42px';
+      heart.style.top = '24px';
+      playArea.appendChild(heart);
+      heartsText.classList.remove('shake');
+      void heartsText.offsetWidth;
+      heartsText.classList.add('shake');
+      playArea.classList.remove('shake');
+      void playArea.offsetWidth;
+      playArea.classList.add('shake');
+      setTimeout(() => heart.remove(), 850);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function updateHud() {
+      scoreText.textContent = state.score;
+      comboText.textContent = state.combo;
+      accuracyText.textContent = state.wrongKeys;
+      heartsText.textContent = '❤️'.repeat(Math.max(0, state.hearts)) + '🖤'.repeat(Math.max(0, 5 - state.hearts));
+    }
+
+    function getAccuracy() {
+      const total = state.correct + state.missed + state.wrongKeys;
+      if (total === 0) return 100;
+      return Math.round((state.correct / total) * 100);
+    }
+
+    function getGrade(accuracy) {
+      if (accuracy >= 98) return '🏆 Perfect!';
+      if (accuracy >= 90) return '🌟 Excellent!';
+      if (accuracy >= 80) return '⭐ Great!';
+      if (accuracy >= 70) return '👍 Good Job!';
+      return '💪 Keep Practicing!';
+    }
+
+    function endGame(won) {
+      if (!state.active) return;
+      state.active = false;
+      clearTimeout(spawnTimer);
+      const timeSec = Math.max(1, Math.round((Date.now() - state.startTime) / 1000));
+      const accuracy = getAccuracy();
+      saveStats(accuracy);
+      clearPlayArea();
+
+      resultTitle.textContent = won ? '🏆 YOU WIN!' : '💔 GAME OVER';
+      resultGrade.textContent = getGrade(accuracy);
+      resultScore.textContent = state.score;
+      resultCorrect.textContent = state.correct;
+      resultMissed.textContent = state.missed;
+      resultWrong.textContent = state.wrongKeys;
+      resultAccuracy.textContent = accuracy + '%';
+      resultCombo.textContent = state.bestCombo;
+      resultTime.textContent = timeSec + 's';
+      bestStatsText.innerHTML = getBestStatsText();
+      showScreen(resultScreen);
+    }
+
+    function saveStats(accuracy) {
+      const prefix = 'typingRain_';
+      const bestGoal = Number(localStorage.getItem(prefix + 'bestGoalScore') || 0);
+      const bestEndless = Number(localStorage.getItem(prefix + 'bestEndlessScore') || 0);
+      const bestAcc = Number(localStorage.getItem(prefix + 'bestAccuracy') || 0);
+      const bestCombo = Number(localStorage.getItem(prefix + 'bestCombo') || 0);
+
+      if (state.mode === 'goal' && state.score > bestGoal) localStorage.setItem(prefix + 'bestGoalScore', state.score);
+      if (state.mode === 'endless' && state.score > bestEndless) localStorage.setItem(prefix + 'bestEndlessScore', state.score);
+      if (accuracy > bestAcc) localStorage.setItem(prefix + 'bestAccuracy', accuracy);
+      if (state.bestCombo > bestCombo) localStorage.setItem(prefix + 'bestCombo', state.bestCombo);
+    }
+
+    function getBestStatsText() {
+      const prefix = 'typingRain_';
+      const bestGoal = localStorage.getItem(prefix + 'bestGoalScore') || 0;
+      const bestEndless = localStorage.getItem(prefix + 'bestEndlessScore') || 0;
+      const bestAcc = localStorage.getItem(prefix + 'bestAccuracy') || 0;
+      const bestCombo = localStorage.getItem(prefix + 'bestCombo') || 0;
+      return `🏅 Best Goal: ${bestGoal} &nbsp; | &nbsp; ♾️ Best Endless: ${bestEndless} &nbsp; | &nbsp; 🎯 Best Accuracy: ${bestAcc}% &nbsp; | &nbsp; 🔥 Best Combo: ${bestCombo}`;
+    }
+
+    startBtn.addEventListener('click', requestStart);
+    confirmThaiBtn.addEventListener('click', () => {
+      thaiModal.classList.remove('show');
+      startGame();
+    });
+    languageSelect.addEventListener('change', updateHint);
+
+    playAgainBtn.addEventListener('click', () => {
+      if (languageSelect.value === 'th') requestStart();
+      else startGame();
+    });
+
+    menuBtn.addEventListener('click', () => {
+      clearTimeout(spawnTimer);
+      showScreen(setupScreen);
+    });
+
+    document.addEventListener('keydown', handleKeydown);
+    playArea.addEventListener('click', () => playArea.focus());
+    updateHint();
+  </script>
+</body>
+</html>
