@@ -10,6 +10,7 @@ These games are designed to help kids practice:
 - Basic English letters
 - Numbers and counting
 - Colors, shapes, fruits, animals, and visual matching
+- Add typing game
 
 ## Play here
 
